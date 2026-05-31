@@ -18,7 +18,6 @@ export default function RecordItem({ record, onEdit, onDelete }: RecordItemProps
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [decryptedSecret, setDecryptedSecret] = useState<string | null>(null);
   const [showSecret, setShowSecret] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleView = () => {
