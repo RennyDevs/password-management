@@ -16,7 +16,7 @@ export async function deriveKeyArgon2(
   try {
     const result = await argon2.hash({
       pass: password,
-      salt: salt,
+      salt: new Uint8Array(salt),
       time: ARGON2_PARAMS.timeCost,
       mem: ARGON2_PARAMS.memory,
       parallelism: ARGON2_PARAMS.parallelism,
@@ -45,7 +45,7 @@ async function deriveKeyPbkdf2(
   const keyBits = await crypto.subtle.deriveBits(
     {
       name: 'PBKDF2',
-      salt,
+      salt: new Uint8Array(salt),
       iterations: 600000,
       hash: 'SHA-256',
     },
