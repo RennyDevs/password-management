@@ -7,6 +7,7 @@ import Header from './components/Header';
 import Auth from './routes/Auth';
 import Home from './routes/Home';
 import Settings from './routes/Settings';
+import ChangePassword from './routes/ChangePassword';
 
 // Context to provide user to all children
 const UserContext = createContext<User | null>(null);
@@ -15,7 +16,7 @@ export const useUser = () => useContext(UserContext);
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-type Page = 'home' | 'settings';
+type Page = 'home' | 'settings' | 'change-password';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -135,6 +136,16 @@ export default function App() {
                 Records
               </button>
               <button
+                onClick={() => setPage('change-password')}
+                className={`py-3 text-sm font-medium border-b-2 transition-colors ${
+                  page === 'change-password'
+                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
+              >
+                Change Password
+              </button>
+              <button
                 onClick={() => setPage('settings')}
                 className={`py-3 text-sm font-medium border-b-2 transition-colors ${
                   page === 'settings'
@@ -150,6 +161,7 @@ export default function App() {
 
         {page === 'home' && <Home />}
         {page === 'settings' && <Settings onLogout={handleLogout} />}
+        {page === 'change-password' && <ChangePassword />}
       </div>
     </UserContext.Provider>
   );
