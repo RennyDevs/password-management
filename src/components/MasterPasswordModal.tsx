@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const MAX_ATTEMPTS = 5;
 const BASE_DELAY_MS = 1000;
@@ -14,6 +15,7 @@ export default function MasterPasswordModal({
   onSubmit,
   onCancel,
 }: MasterPasswordModalProps) {
+  const { t } = useTranslation();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,13 +34,13 @@ export default function MasterPasswordModal({
     // Check lock
     if (lockedUntil && Date.now() < lockedUntil) {
       const remaining = Math.ceil((lockedUntil - Date.now()) / 1000);
-      setError(`Locked. Try again in ${remaining}s`);
+      setError(t('masterPasswordModal.lockedMessage', { seconds: remaining }));
       return;
     }
     setLockedUntil(null);
 
     if (!password.trim()) {
-      setError('Password is required');
+      setError(t('masterPasswordModal.errorPasswordRequired'));
       return;
     }
 
@@ -59,17 +61,17 @@ export default function MasterPasswordModal({
           const delay = getLockDelay(newAttempts);
           const until = Date.now() + delay;
           setLockedUntil(until);
-          setError(`Too many failed attempts. Locked for ${Math.ceil(delay / 1000)}s`);
+          setError(t('masterPasswordModal.errorTooManyAttempts', { seconds: Math.ceil(delay / 1000) }));
         } else {
           const remaining = MAX_ATTEMPTS - newAttempts;
-          setError(`Invalid password. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining`);
+          setError(t('masterPasswordModal.errorInvalidPassword', { remaining }));
         }
 
         // Focus input after error
         setTimeout(() => inputRef.current?.focus(), 100);
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(t('masterPasswordModal.errorGeneric'));
     } finally {
       setLoading(false);
     }
@@ -82,7 +84,7 @@ export default function MasterPasswordModal({
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="master-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Master Password
+              {t('masterPasswordModal.masterPasswordLabel')}
             </label>
             <input
               ref={inputRef}
@@ -91,7 +93,7 @@ export default function MasterPasswordModal({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-              placeholder="Enter master password"
+              placeholder={t('masterPasswordModal.masterPasswordPlaceholder')}
               autoFocus
               disabled={loading}
             />
@@ -110,14 +112,14 @@ export default function MasterPasswordModal({
               className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               disabled={loading}
             >
-              Cancel
+              {t('masterPasswordModal.cancel')}
             </button>
             <button
               type="submit"
               disabled={loading}
               className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
             >
-              {loading ? 'Verifying...' : 'Unlock'}
+              {loading ? t('masterPasswordModal.verifying') : t('masterPasswordModal.unlock')}
             </button>
           </div>
         </form>

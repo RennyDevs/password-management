@@ -1,4 +1,5 @@
 import { useState, useEffect, createContext, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { User } from '@supabase/supabase-js';
 import { getCurrentUser, onAuthStateChange } from './lib/auth/supabaseAuth';
 import { initSupabase } from './lib/storage/supabase';
@@ -19,6 +20,7 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 type Page = 'home' | 'settings' | 'change-password';
 
 export default function App() {
+  const { t } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [page, setPage] = useState<Page>('home');
   const [initializing, setInitializing] = useState(true);
@@ -71,7 +73,7 @@ export default function App() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Initializing...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">{t('app.initializing')}</p>
         </div>
       </div>
     );
@@ -82,16 +84,16 @@ export default function App() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8 max-w-md text-center">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Configuration Required</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{t('app.configRequired')}</h1>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Please set the following environment variables:
+            {t('app.configRequiredText')}
           </p>
           <code className="block text-sm bg-gray-100 dark:bg-gray-700 p-3 rounded text-left">
             VITE_SUPABASE_URL=&lt;your-url&gt;<br />
             VITE_SUPABASE_ANON_KEY=&lt;your-anon-key&gt;
           </code>
           <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-            Create a <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">.env</code> file in the project root.
+            <span dangerouslySetInnerHTML={{ __html: t('app.configFileHint') }} />
           </p>
         </div>
       </div>
@@ -116,7 +118,7 @@ export default function App() {
         {!sodiumReady && (
           <div className="max-w-4xl mx-auto px-4 py-3">
             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-sm text-amber-700 dark:text-amber-300">
-              ⚠️ Cryptographic library not fully initialized. Some features may not work.
+              {t('app.cryptoWarning')}
             </div>
           </div>
         )}
@@ -133,7 +135,7 @@ export default function App() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
-                Records
+                {t('app.navRecords')}
               </button>
               <button
                 onClick={() => setPage('change-password')}
@@ -143,7 +145,7 @@ export default function App() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
-                Change Password
+                {t('app.navChangePassword')}
               </button>
               <button
                 onClick={() => setPage('settings')}
@@ -153,7 +155,7 @@ export default function App() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
-                Settings
+                {t('app.navSettings')}
               </button>
             </nav>
           </div>

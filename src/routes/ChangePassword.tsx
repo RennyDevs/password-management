@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function ChangePassword() {
+  const { t } = useTranslation();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -22,10 +24,10 @@ export default function ChangePassword() {
     if (/[^a-zA-Z0-9]/.test(pw)) score++;
     if (pw.length >= 16) score++;
 
-    if (score <= 2) return { label: 'Weak', color: 'bg-red-500', width: 'w-1/4' };
-    if (score <= 4) return { label: 'Fair', color: 'bg-yellow-500', width: 'w-2/4' };
-    if (score <= 5) return { label: 'Good', color: 'bg-blue-500', width: 'w-3/4' };
-    return { label: 'Strong', color: 'bg-green-500', width: 'w-full' };
+    if (score <= 2) return { label: t('changePassword.strengthWeak'), color: 'bg-red-500', width: 'w-1/4' };
+    if (score <= 4) return { label: t('changePassword.strengthFair'), color: 'bg-yellow-500', width: 'w-2/4' };
+    if (score <= 5) return { label: t('changePassword.strengthGood'), color: 'bg-blue-500', width: 'w-3/4' };
+    return { label: t('changePassword.strengthStrong'), color: 'bg-green-500', width: 'w-full' };
   };
 
   const strength = newPassword ? getStrength(newPassword) : null;
@@ -37,22 +39,22 @@ export default function ChangePassword() {
 
     // Validation
     if (!currentPassword || !newPassword || !confirmPassword) {
-      setError('All fields are required.');
+      setError(t('changePassword.errorAllFieldsRequired'));
       return;
     }
 
     if (newPassword.length < 8) {
-      setError('New password must be at least 8 characters long.');
+      setError(t('changePassword.errorMinLength'));
       return;
     }
 
     if (newPassword === currentPassword) {
-      setError('New password must be different from the current password.');
+      setError(t('changePassword.errorMustDiffer'));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError('New password and confirmation do not match.');
+      setError(t('changePassword.errorMismatch'));
       return;
     }
 
@@ -74,21 +76,21 @@ export default function ChangePassword() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Change Password</h2>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('changePassword.heading')}</h2>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Current password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Current Password
+              {t('changePassword.currentPasswordLabel')}
             </label>
             <div className="relative">
               <input
                 type={showCurrent ? 'text' : 'password'}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Enter your current password"
+                placeholder={t('changePassword.currentPasswordPlaceholder')}
                 className={inputClass + ' pr-10'}
                 autoComplete="current-password"
               />
@@ -106,14 +108,14 @@ export default function ChangePassword() {
           {/* New password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              New Password
+              {t('changePassword.newPasswordLabel')}
             </label>
             <div className="relative">
               <input
                 type={showNew ? 'text' : 'password'}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter your new password"
+                placeholder={t('changePassword.newPasswordPlaceholder')}
                 className={inputClass + ' pr-10'}
                 autoComplete="new-password"
               />
@@ -151,16 +153,16 @@ export default function ChangePassword() {
             {newPassword && (
               <ul className="mt-2 space-y-1 text-xs text-gray-500 dark:text-gray-400">
                 <li className={newPassword.length >= 8 ? 'text-green-600 dark:text-green-400' : ''}>
-                  {newPassword.length >= 8 ? '✓' : '○'} At least 8 characters
+                  {newPassword.length >= 8 ? '✓' : '○'} {t('changePassword.requirementChars')}
                 </li>
                 <li className={/[A-Z]/.test(newPassword) ? 'text-green-600 dark:text-green-400' : ''}>
-                  {/[A-Z]/.test(newPassword) ? '✓' : '○'} One uppercase letter
+                  {/[A-Z]/.test(newPassword) ? '✓' : '○'} {t('changePassword.requirementUppercase')}
                 </li>
                 <li className={/\d/.test(newPassword) ? 'text-green-600 dark:text-green-400' : ''}>
-                  {/\d/.test(newPassword) ? '✓' : '○'} One number
+                  {/\d/.test(newPassword) ? '✓' : '○'} {t('changePassword.requirementNumber')}
                 </li>
                 <li className={/[^a-zA-Z0-9]/.test(newPassword) ? 'text-green-600 dark:text-green-400' : ''}>
-                  {/[^a-zA-Z0-9]/.test(newPassword) ? '✓' : '○'} One special character
+                  {/[^a-zA-Z0-9]/.test(newPassword) ? '✓' : '○'} {t('changePassword.requirementSpecial')}
                 </li>
               </ul>
             )}
@@ -169,14 +171,14 @@ export default function ChangePassword() {
           {/* Confirm new password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Confirm New Password
+              {t('changePassword.confirmNewPasswordLabel')}
             </label>
             <div className="relative">
               <input
                 type={showConfirm ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter your new password"
+                placeholder={t('changePassword.confirmNewPasswordPlaceholder')}
                 className={inputClass + ' pr-10'}
                 autoComplete="new-password"
               />
@@ -196,7 +198,7 @@ export default function ChangePassword() {
                   ? 'text-green-600 dark:text-green-400'
                   : 'text-red-600 dark:text-red-400'
               }`}>
-                {newPassword === confirmPassword ? '✓ Passwords match' : '✗ Passwords do not match'}
+                {newPassword === confirmPassword ? t('changePassword.passwordsMatch') : t('changePassword.passwordsDoNotMatch')}
               </p>
             )}
           </div>
@@ -211,7 +213,7 @@ export default function ChangePassword() {
           {/* Success message */}
           {success && (
             <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 text-sm text-green-700 dark:text-green-300">
-              ✓ Password changed successfully.
+              {t('changePassword.successMessage')}
             </div>
           )}
 
@@ -227,18 +229,18 @@ export default function ChangePassword() {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
             )}
-            {submitting ? 'Changing password...' : 'Change Password'}
+            {submitting ? t('changePassword.submittingButton') : t('changePassword.submitButton')}
           </button>
         </form>
       </div>
 
       {/* Security warning */}
       <div className="mt-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 text-sm text-amber-700 dark:text-amber-300">
-        <p className="font-medium mb-1">🔒 Security Notice</p>
+        <p className="font-medium mb-1">{t('changePassword.securityNotice')}</p>
         <ul className="space-y-1">
-          <li>• Use a strong, unique password that you don't use elsewhere.</li>
-          <li>• After changing your password, other active sessions may be invalidated.</li>
-          <li>• If you forget your password, your encrypted data cannot be recovered.</li>
+          <li>{t('changePassword.warningStrongPassword')}</li>
+          <li>{t('changePassword.warningSessionInvalidation')}</li>
+          <li>{t('changePassword.warningLostPassword')}</li>
         </ul>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -16,6 +17,7 @@ interface RecordItemProps {
 }
 
 export default function RecordItem({ record, onEdit, onDelete }: RecordItemProps) {
+  const { t } = useTranslation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [decryptedSecret, setDecryptedSecret] = useState<string | null>(null);
@@ -33,7 +35,7 @@ export default function RecordItem({ record, onEdit, onDelete }: RecordItemProps
     try {
       const fullRecord = await fetchFullRecord(record.id);
       if (!fullRecord) {
-        setError('Record not found');
+        setError(t('recordItem.recordNotFound'));
         return false;
       }
 
@@ -76,9 +78,9 @@ export default function RecordItem({ record, onEdit, onDelete }: RecordItemProps
               {record.title}
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Created: {format(new Date(record.created_at), 'MMM d, yyyy HH:mm')}
+              {t('recordItem.created', { date: format(new Date(record.created_at), 'MMM d, yyyy HH:mm') })}
               {record.updated_at !== record.created_at &&
-                ` · Updated: ${format(new Date(record.updated_at), 'MMM d, yyyy HH:mm')}`}
+                ` · ${t('recordItem.updated', { date: format(new Date(record.updated_at), 'MMM d, yyyy HH:mm') })}`}
             </p>
           </div>
 
@@ -87,19 +89,19 @@ export default function RecordItem({ record, onEdit, onDelete }: RecordItemProps
               onClick={handleView}
               className="px-3 py-1.5 text-sm bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
             >
-              View
+              {t('recordItem.view')}
             </button>
             <button
               onClick={() => onEdit(record.id)}
               className="px-3 py-1.5 text-sm bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600"
             >
-              Edit
+              {t('recordItem.edit')}
             </button>
             <button
               onClick={handleDelete}
               className="px-3 py-1.5 text-sm bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
             >
-              Delete
+              {t('recordItem.delete')}
             </button>
           </div>
         </div>
@@ -108,25 +110,25 @@ export default function RecordItem({ record, onEdit, onDelete }: RecordItemProps
         {decryptedSecret !== null && (
           <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Decrypted Secret</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('recordItem.decryptedSecret')}</span>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowSecret(!showSecret)}
                   className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
                 >
-                  {showSecret ? 'Hide' : 'Show'}
+                  {showSecret ? t('recordItem.hide') : t('recordItem.show')}
                 </button>
                 <button
                   onClick={handleCopySecret}
                   className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
                 >
-                  Copy
+                  {t('recordItem.copy')}
                 </button>
                 <button
                   onClick={() => { setDecryptedSecret(null); setShowSecret(false); }}
                   className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                 >
-                  Clear
+                  {t('recordItem.clear')}
                 </button>
               </div>
             </div>
@@ -151,7 +153,7 @@ export default function RecordItem({ record, onEdit, onDelete }: RecordItemProps
 
       {showPasswordModal && (
         <MasterPasswordModal
-          title={`Unlock: ${record.title}`}
+          title={t('recordItem.unlockTitle', { title: record.title })}
           onSubmit={handlePasswordSubmit}
           onCancel={() => setShowPasswordModal(false)}
         />
@@ -159,9 +161,9 @@ export default function RecordItem({ record, onEdit, onDelete }: RecordItemProps
 
       {showDeleteConfirm && (
         <ConfirmModal
-          title="Delete Record"
-          message={`Are you sure you want to delete "${record.title}"? This action cannot be undone.`}
-          confirmLabel="Delete"
+          title={t('recordItem.deleteConfirmTitle')}
+          message={t('recordItem.deleteConfirmMessage', { title: record.title })}
+          confirmLabel={t('recordItem.delete')}
           onConfirm={handleConfirmDelete}
           onCancel={() => setShowDeleteConfirm(false)}
           destructive

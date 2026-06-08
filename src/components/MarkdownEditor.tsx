@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -16,11 +17,13 @@ export default function MarkdownEditor({
   id,
   value,
   onChange,
-  placeholder = 'Enter markdown content...',
+  placeholder,
   rows = 10,
   disabled = false,
   minHeight = '300px',
 }: MarkdownEditorProps) {
+  const { t } = useTranslation();
+  const resolvedPlaceholder = placeholder ?? t('markdownEditor.defaultPlaceholder');
   const [activeTab, setActiveTab] = useState<'edit' | 'preview' | 'split'>('split');
 
   return (
@@ -36,7 +39,7 @@ export default function MarkdownEditor({
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
           }`}
         >
-          Edit
+          {t('markdownEditor.edit')}
         </button>
         <button
           type="button"
@@ -47,7 +50,7 @@ export default function MarkdownEditor({
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
           }`}
         >
-          Preview
+          {t('markdownEditor.preview')}
         </button>
         <button
           type="button"
@@ -58,10 +61,10 @@ export default function MarkdownEditor({
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
           }`}
         >
-          Split
+          {t('markdownEditor.split')}
         </button>
         <div className="flex-1" />
-        <span className="text-xs text-gray-400 dark:text-gray-500">Markdown</span>
+        <span className="text-xs text-gray-400 dark:text-gray-500">{t('markdownEditor.markdown')}</span>
       </div>
 
       {/* Editor area */}
@@ -76,7 +79,7 @@ export default function MarkdownEditor({
               id={id}
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              placeholder={placeholder}
+              placeholder={resolvedPlaceholder}
               rows={rows}
               disabled={disabled}
               className="w-full h-full min-h-[inherit] px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm resize-none outline-none border-0 focus:ring-0"
@@ -98,7 +101,7 @@ export default function MarkdownEditor({
                 {value}
               </ReactMarkdown>
             ) : (
-              <p className="text-gray-400 dark:text-gray-500 italic">Nothing to preview</p>
+              <p className="text-gray-400 dark:text-gray-500 italic">{t('markdownEditor.nothingToPreview')}</p>
             )}
           </div>
         )}

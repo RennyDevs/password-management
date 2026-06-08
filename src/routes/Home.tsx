@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import RecordList from '../components/RecordList';
 import EditRecordModal from '../components/EditRecordModal';
 import MasterPasswordModal from '../components/MasterPasswordModal';
@@ -16,6 +17,9 @@ function nextToastId(): string {
 }
 
 export default function Home() {
+  const { t } = useTranslation();
+  const tRef = useRef(t);
+  tRef.current = t;
   const user = useUser();
   const [records, setRecords] = useState<RecordListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,13 +35,13 @@ export default function Home() {
   const [passwordPromptOpen, setPasswordPromptOpen] = useState(false);
   const [pendingSave, setPendingSave] = useState<{ title: string; secret: string } | null>(null);
 
-  const addToast = (text: string, type: ToastMessage['type'] = 'info') => {
+  const addToastRef = useRef((text: string, type: ToastMessage['type'] = 'info') => {
     const id = nextToastId();
     setToasts((prev) => [...prev, { id, text, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 4000);
-  };
+  });
 
   const loadRecords = useCallback(async () => {
     if (!user) return;
@@ -46,7 +50,7 @@ export default function Home() {
       const data = await fetchRecords(user.id);
       setRecords(data);
     } catch (err) {
-      addToast('Failed to load records', 'error');
+      addToastRef.current(tRef.current('home.failedLoadRecords'), 'error');
       console.error('Load records error:', err);
     } finally {
       setLoading(false);
@@ -78,7 +82,7 @@ export default function Home() {
     try {
       const fullRecord = await fetchFullRecord(editingRecordId);
       if (!fullRecord) {
-        addToast('Record not found', 'error');
+        addToast(t('home.recordNotFound'), 'error');
         return false;
       }
 
@@ -108,7 +112,7 @@ export default function Home() {
   const handlePasswordForSave = async (password: string): Promise<boolean> => {
     if (!pendingSave) return false;
     if (!user) {
-      addToast('You must be logged in', 'error');
+      addToast(t('home.mustBeLoggedIn'), 'error');
       return false;
     }
 
@@ -134,7 +138,7 @@ export default function Home() {
       await upsertRecordCache(record);
 
       addToast(
-        editingRecordId ? 'Record updated successfully' : 'Record created successfully',
+        editingRecordId ? t('home.recordUpdated') : t('home.recordCreated'),
         'success'
       );
 
@@ -144,7 +148,7 @@ export default function Home() {
       await loadRecords();
       return true;
     } catch (err) {
-      addToast('Failed to save record', 'error');
+      addToast(t('home.failedSaveRecord'), 'error');
       console.error('Save error:', err);
       return false;
     }
@@ -155,9 +159,9 @@ export default function Home() {
       await deleteRecord(recordId);
       await deleteRecordCache(recordId);
       setRecords((prev) => prev.filter((r) => r.id !== recordId));
-      addToast('Record deleted', 'success');
+      addToast(t('home.recordDeleted'), 'success');
     } catch (err) {
-      addToast('Failed to delete record', 'error');
+      addToast(t('home.failedDeleteRecord'), 'error');
       console.error('Delete error:', err);
     }
   };
@@ -166,8 +170,8 @@ export default function Home() {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Welcome to Password Manager</h2>
-          <p className="text-gray-500 dark:text-gray-400">Please sign in to manage your encrypted records.</p>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('home.welcomeHeading')}</h2>
+          <p className="text-gray-500 dark:text-gray-400">{t('home.welcomeText')}</p>
         </div>
       </div>
     );
@@ -176,7 +180,7 @@ export default function Home() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">My Records</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('home.myRecords')}</h2>
         <button
           onClick={handleNewRecord}
           className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
@@ -184,7 +188,7 @@ export default function Home() {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          New Record
+          {t('home.newRecord')}
         </button>
       </div>
 
@@ -212,7 +216,7 @@ export default function Home() {
       {/* Password prompt for encrypt/decrypt */}
       {passwordPromptOpen && (
         <MasterPasswordModal
-          title={pendingSave ? 'Confirm Master Password to Save' : 'Enter Master Password to Edit'}
+          title={pendingSave ? t('home.confirmMasterPasswordSave') : t('home.enterMasterPasswordEdit')}
           onSubmit={pendingSave ? handlePasswordForSave : handlePasswordForEdit}
           onCancel={() => {
             setPasswordPromptOpen(false);

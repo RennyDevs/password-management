@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { signIn, signUp } from '../lib/auth/supabaseAuth';
 
 interface AuthProps {
@@ -6,6 +7,7 @@ interface AuthProps {
 }
 
 export default function Auth({ onAuthSuccess }: AuthProps) {
+  const { t } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,7 +27,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
       }
       onAuthSuccess();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Authentication failed';
+      const message = err instanceof Error ? err.message : t('auth.authError')
       setError(message);
     } finally {
       setLoading(false);
@@ -40,16 +42,16 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
             <svg className="mx-auto w-12 h-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">Password Manager</h1>
+            <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">{t('auth.title')}</h1>
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              {isLogin ? 'Sign in to your account' : 'Create a new account'}
+              {isLogin ? t('auth.signInPrompt') : t('auth.signUpPrompt')}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Email
+                {t('auth.emailLabel')}
               </label>
               <input
                 id="email"
@@ -57,7 +59,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-                placeholder="you@example.com"
+                placeholder={t('auth.emailPlaceholder')}
                 required
                 autoFocus
               />
@@ -65,7 +67,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
 
             <div>
               <label htmlFor="auth-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Password
+                {t('auth.passwordLabel')}
               </label>
               <input
                 id="auth-password"
@@ -73,7 +75,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-                placeholder="Enter password"
+                placeholder={t('auth.passwordPlaceholder')}
                 required
                 minLength={6}
               />
@@ -90,7 +92,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
               disabled={loading}
               className="w-full py-2.5 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors font-medium"
             >
-              {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Sign Up'}
+              {loading ? t('auth.loading') : isLogin ? t('auth.signIn') : t('auth.signUp')}
             </button>
           </form>
 
@@ -99,7 +101,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
               onClick={() => { setIsLogin(!isLogin); setError(''); }}
               className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
             >
-              {isLogin ? "Don't have an account? Sign Up" : 'Already have an account? Sign In'}
+              {isLogin ? t('auth.switchToSignUp') : t('auth.switchToSignIn')}
             </button>
           </div>
         </div>

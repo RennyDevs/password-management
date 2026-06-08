@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 interface ConfirmModalProps {
   title: string;
   message: string;
@@ -11,12 +13,15 @@ interface ConfirmModalProps {
 export default function ConfirmModal({
   title,
   message,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
   destructive = false,
 }: ConfirmModalProps) {
+  const { t } = useTranslation();
+  const resolvedConfirmLabel = confirmLabel ?? t('confirmModal.confirm');
+  const resolvedCancelLabel = cancelLabel ?? t('confirmModal.cancel');
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
@@ -27,7 +32,7 @@ export default function ConfirmModal({
             onClick={onCancel}
             className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
-            {cancelLabel}
+            {resolvedCancelLabel}
           </button>
           <button
             onClick={onConfirm}
@@ -37,7 +42,7 @@ export default function ConfirmModal({
                 : 'bg-indigo-600 hover:bg-indigo-700'
             }`}
           >
-            {confirmLabel}
+            {resolvedConfirmLabel}
           </button>
         </div>
       </div>
