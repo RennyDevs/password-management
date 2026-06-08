@@ -55,8 +55,13 @@ export default function App() {
 
     init();
 
-    // Listen for auth changes
+    // Listen for auth changes — skip the initial emission since we already called getCurrentUser()
+    let isInitial = true;
     const unsubscribe = onAuthStateChange((newUser) => {
+      if (isInitial) {
+        isInitial = false;
+        return;
+      }
       setUser(newUser);
     });
 

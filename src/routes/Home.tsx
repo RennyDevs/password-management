@@ -18,8 +18,6 @@ function nextToastId(): string {
 
 export default function Home() {
   const { t } = useTranslation();
-  const tRef = useRef(t);
-  tRef.current = t;
   const user = useUser();
   const [records, setRecords] = useState<RecordListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,30 +33,53 @@ export default function Home() {
   const [passwordPromptOpen, setPasswordPromptOpen] = useState(false);
   const [pendingSave, setPendingSave] = useState<{ title: string; secret: string } | null>(null);
 
-  const addToastRef = useRef((text: string, type: ToastMessage['type'] = 'info') => {
+  // Stable toast function — useRef avoids re-creating the callback on every render
+  const addToast = useCallback((text: string, type: ToastMessage['type'] = 'info') => {
     const id = nextToastId();
     setToasts((prev) => [...prev, { id, text, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 4000);
-  });
+  }, []);
 
-  const loadRecords = useCallback(async () => {
+  // Guard against duplicate calls from React StrictMode or rapid auth state changes
+  const loadedRef = useRef(false);
+  const userIdRef = useRef<string | null>(null);
+  const loadingRef = useRef(false);
+
+  const loadRecords = useCallback(async (force = false) => {
     if (!user) return;
+    // Skip if already loading (prevents race conditions)
+    if (loadingRef.current) return;
+    // Skip duplicate initial loads (StrictMode double-fire), unless forced
+    if (!force && loadedRef.current && userIdRef.current === user.id) return;
+    userIdRef.current = user.id;
+    loadingRef.current = true;
     setLoading(true);
     try {
       const data = await fetchRecords(user.id);
       setRecords(data);
+      loadedRef.current = true;
     } catch (err) {
-      addToastRef.current(tRef.current('home.failedLoadRecords'), 'error');
+      addToast(t('home.failedLoadRecords'), 'error');
       console.error('Load records error:', err);
     } finally {
       setLoading(false);
+      loadingRef.current = false;
     }
   }, [user]);
 
+  // Initial load + reload on visibility change (user switches back to this tab)
   useEffect(() => {
     loadRecords();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        loadRecords(true);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [loadRecords]);
 
   // New record
