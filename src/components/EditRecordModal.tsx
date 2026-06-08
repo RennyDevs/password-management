@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import MarkdownEditor from './MarkdownEditor';
 
 interface EditRecordModalProps {
   title: string;
@@ -69,16 +70,16 @@ export default function EditRecordModal({
 
           <div className="mb-4">
             <label htmlFor="edit-secret" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Secret
+              Secret <span className="text-xs text-gray-400 dark:text-gray-500 font-normal">(Markdown supported)</span>
             </label>
-            <textarea
+            <MarkdownEditor
               id="edit-secret"
               value={secret}
-              onChange={(e) => setSecret(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-y min-h-[120px] font-mono text-sm"
-              placeholder="Enter the secret content to encrypt"
+              onChange={setSecret}
+              placeholder="Enter the secret content to encrypt (Markdown supported)"
               rows={6}
               disabled={saving}
+              minHeight="250px"
             />
           </div>
 

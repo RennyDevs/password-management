@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import type { RecordListItem } from '../types/record';
 import { fetchFullRecord } from '../lib/storage/supabase';
 import { decryptPayload } from '../lib/crypto';
@@ -128,11 +130,17 @@ export default function RecordItem({ record, onEdit, onDelete }: RecordItemProps
                 </button>
               </div>
             </div>
-            <pre className={`text-sm font-mono whitespace-pre-wrap break-all ${
-              showSecret ? 'text-gray-900 dark:text-white' : 'text-transparent dark:text-transparent select-none'
-            }`}>
-              {showSecret ? decryptedSecret : '•'.repeat(Math.min(decryptedSecret.length, 100))}
-            </pre>
+            {showSecret ? (
+              <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-gray-900 dark:prose-headings:text-white prose-a:text-indigo-600 dark:prose-a:text-indigo-400 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:text-sm">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {decryptedSecret}
+                </ReactMarkdown>
+              </div>
+            ) : (
+              <pre className="text-sm font-mono whitespace-pre-wrap break-all text-transparent dark:text-transparent select-none">
+                {'•'.repeat(Math.min(decryptedSecret.length, 100))}
+              </pre>
+            )}
           </div>
         )}
 
