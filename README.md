@@ -63,6 +63,7 @@ src/
 ├── index.css                # Tailwind imports
 ├── routes/
 │   ├── Auth.tsx             # Login/Signup
+│   ├── ChangePassword.tsx   # Change user password
 │   ├── Home.tsx             # Records list & management
 │   └── Settings.tsx         # Settings & security info
 ├── components/
@@ -70,6 +71,7 @@ src/
 │   ├── RecordList.tsx
 │   ├── RecordItem.tsx
 │   ├── MasterPasswordModal.tsx
+│   ├── MarkdownEditor.tsx
 │   ├── EditRecordModal.tsx
 │   ├── ConfirmModal.tsx
 │   └── Toast.tsx
@@ -83,11 +85,17 @@ src/
 │   │   └── indexeddb.ts     # IndexedDB cache
 │   ├── auth/
 │   │   └── supabaseAuth.ts  # Auth helpers
+│   ├── i18n/
+│   │   ├── i18n.ts  # Auth helpers
+│   │   └── locale/
+│   │      ├── en.json
+│   │      └── es.json
 │   └── utils/
 │       ├── uid.ts           # UUID generation
 │       ├── timer.ts         # Session timer
 │       └── clipboard.ts     # Clipboard management
 └── types/
+    ├── argon2-browser.d.ts
     ├── record.ts
     └── crypto.ts
 ```
