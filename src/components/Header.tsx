@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getCurrentUser, signOut } from '../lib/auth/supabaseAuth';
-import type { User } from '@supabase/supabase-js';
+import { signOut } from '../lib/auth/supabaseAuth';
+import { useUser } from '../App';
 
 interface HeaderProps {
   onLogout: () => void;
@@ -9,11 +8,7 @@ interface HeaderProps {
 
 export default function Header({ onLogout }: HeaderProps) {
   const { t } = useTranslation();
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    getCurrentUser().then(setUser);
-  }, []);
+  const user = useUser();
 
   const handleLogout = async () => {
     await signOut();

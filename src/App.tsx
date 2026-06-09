@@ -1,7 +1,7 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { User } from '@supabase/supabase-js';
-import { getCurrentUser, onAuthStateChange } from './lib/auth/supabaseAuth';
+import { onAuthStateChange } from './lib/auth/supabaseAuth';
 import { initSupabase } from './lib/storage/supabase';
 import { ensureSodiumReady } from './lib/crypto/sodiumWrapper';
 import Header from './components/Header';
@@ -47,21 +47,13 @@ export default function App() {
         console.error('Failed to initialize libsodium:', err);
       }
 
-      // Get current user
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
       setInitializing(false);
     }
 
     init();
 
-    // Listen for auth changes — skip the initial emission since we already called getCurrentUser()
-    let isInitial = true;
+    // Listen for auth changes — the initial emission sets the user
     const unsubscribe = onAuthStateChange((newUser) => {
-      if (isInitial) {
-        isInitial = false;
-        return;
-      }
       setUser(newUser);
     });
 
@@ -109,7 +101,7 @@ export default function App() {
   if (!user) {
     return (
       <UserContext.Provider value={null}>
-        <Auth onAuthSuccess={() => getCurrentUser().then(setUser)} />
+        <Auth onAuthSuccess={() => {/* Auth state change is handled by onAuthStateChange */}} />
       </UserContext.Provider>
     );
   }
