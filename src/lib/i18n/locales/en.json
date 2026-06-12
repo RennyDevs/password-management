@@ -16,7 +16,11 @@
     "signUp": "Sign Up",
     "switchToSignUp": "Don't have an account? Sign Up",
     "switchToSignIn": "Already have an account? Sign In",
-    "authError": "Authentication failed"
+    "authError": "Authentication failed",
+    "errorInvalidCredentials": "Invalid credentials. {{remaining}} attempt(s) remaining.",
+    "errorTooManyAttempts": "Too many failed attempts. Locked for {{seconds}}s.",
+    "errorLocked": "Locked. Try again in {{seconds}}s.",
+    "waiting": "Waiting..."
   },
   "app": {
     "initializing": "Initializing...",

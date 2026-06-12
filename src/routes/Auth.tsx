@@ -1,6 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { signIn, signUp } from '../lib/auth/supabaseAuth';
+import {
+  type RateLimitState,
+  getLockRemaining,
+  processFailedAttempt,
+} from '../lib/utils/rateLimit';
 
 interface AuthProps {
   onAuthSuccess: () => void;
@@ -14,8 +19,48 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Per-mode rate limit state (sign-in vs sign-up tracked separately)
+  const [rateLimit, setRateLimit] = useState<RateLimitState>({
+    attempts: 0,
+    lockedUntil: null,
+  });
+
+  const lockedUntilRef = useRef(rateLimit.lockedUntil);
+
+  // Tick-based lockout countdown: refreshes the UI every second
+  useEffect(() => {
+    lockedUntilRef.current = rateLimit.lockedUntil;
+  }, [rateLimit.lockedUntil]);
+
+  useEffect(() => {
+    const remaining = getLockRemaining(lockedUntilRef.current);
+    if (remaining <= 0) return;
+
+    const interval = setInterval(() => {
+      const now = getLockRemaining(lockedUntilRef.current);
+      if (now > 0) {
+        setError(t('auth.errorLocked', { seconds: now }));
+      } else {
+        setError('');
+        setRateLimit((prev) => ({ ...prev, lockedUntil: null }));
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [rateLimit.lockedUntil, t]);
+
+  const lockedOut = getLockRemaining(rateLimit.lockedUntil) > 0;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check lockout
+    const lockRemaining = getLockRemaining(rateLimit.lockedUntil);
+    if (lockRemaining > 0) {
+      setError(t('auth.errorLocked', { seconds: lockRemaining }));
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -25,10 +70,18 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
       } else {
         await signUp(email, password);
       }
+      // Reset rate limit on success
+      setRateLimit({ attempts: 0, lockedUntil: null });
       onAuthSuccess();
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('auth.authError')
-      setError(message);
+      const { state, remaining, lockedSeconds } = processFailedAttempt(rateLimit);
+      setRateLimit(state);
+
+      if (lockedSeconds > 0) {
+        setError(t('auth.errorTooManyAttempts', { seconds: lockedSeconds }));
+      } else {
+        setError(t('auth.errorInvalidCredentials', { remaining }));
+      }
     } finally {
       setLoading(false);
     }
@@ -89,10 +142,16 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || lockedOut}
               className="w-full py-2.5 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors font-medium"
             >
-              {loading ? t('auth.loading') : isLogin ? t('auth.signIn') : t('auth.signUp')}
+              {loading
+                ? t('auth.loading')
+                : lockedOut
+                  ? t('auth.waiting')
+                  : isLogin
+                    ? t('auth.signIn')
+                    : t('auth.signUp')}
             </button>
           </form>
 

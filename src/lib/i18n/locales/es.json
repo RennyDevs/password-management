@@ -16,7 +16,11 @@
     "signUp": "Registrarse",
     "switchToSignUp": "¿No tienes cuenta? Regístrate",
     "switchToSignIn": "¿Ya tienes cuenta? Inicia sesión",
-    "authError": "Autenticación fallida"
+    "authError": "Autenticación fallida",
+    "errorInvalidCredentials": "Credenciales inválidas. {{remaining}} intento(s) restante(s).",
+    "errorTooManyAttempts": "Demasiados intentos fallidos. Bloqueado por {{seconds}}s.",
+    "errorLocked": "Bloqueado. Intenta de nuevo en {{seconds}}s.",
+    "waiting": "Espera..."
   },
   "app": {
     "initializing": "Inicializando...",
