@@ -218,6 +218,7 @@ export default function Home() {
         loading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onToast={addToast}
       />
 
       {/* Edit/Create modal */}

@@ -14,9 +14,10 @@ interface RecordItemProps {
   record: RecordListItem;
   onEdit: (recordId: string) => void;
   onDelete: (recordId: string) => void;
+  onToast: (text: string, type: 'success' | 'error' | 'info') => void;
 }
 
-export default function RecordItem({ record, onEdit, onDelete }: RecordItemProps) {
+export default function RecordItem({ record, onEdit, onDelete, onToast }: RecordItemProps) {
   const { t } = useTranslation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -56,7 +57,12 @@ export default function RecordItem({ record, onEdit, onDelete }: RecordItemProps
 
   const handleCopySecret = async () => {
     if (decryptedSecret) {
-      await copyToClipboard(decryptedSecret);
+      await copyToClipboard(decryptedSecret, 60000, (errMsg) => {
+        onToast(
+          t('recordItem.clipboardClearFailed', { error: errMsg }),
+          'error',
+        );
+      });
     }
   };
 

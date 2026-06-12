@@ -7,9 +7,10 @@ interface RecordListProps {
   loading: boolean;
   onEdit: (recordId: string) => void;
   onDelete: (recordId: string) => void;
+  onToast: (text: string, type: 'success' | 'error' | 'info') => void;
 }
 
-export default function RecordList({ records, loading, onEdit, onDelete }: RecordListProps) {
+export default function RecordList({ records, loading, onEdit, onDelete, onToast }: RecordListProps) {
   const { t } = useTranslation();
   if (loading) {
     return (
@@ -42,6 +43,7 @@ export default function RecordList({ records, loading, onEdit, onDelete }: Recor
           record={record}
           onEdit={onEdit}
           onDelete={onDelete}
+          onToast={onToast}
         />
       ))}
     </div>

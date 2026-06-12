@@ -124,7 +124,8 @@
     "recordNotFound": "Record not found",
     "unlockTitle": "Unlock: {{title}}",
     "deleteConfirmTitle": "Delete Record",
-    "deleteConfirmMessage": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone."
+    "deleteConfirmMessage": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone.",
+    "clipboardClearFailed": "⚠️ Failed to clear clipboard after copy: {{error}}. Your secret may still be in the clipboard."
   },
   "editRecordModal": {
     "newRecord": "New Record",

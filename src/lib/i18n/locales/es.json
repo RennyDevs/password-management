@@ -124,7 +124,8 @@
     "recordNotFound": "Registro no encontrado",
     "unlockTitle": "Desbloquear: {{title}}",
     "deleteConfirmTitle": "Eliminar Registro",
-    "deleteConfirmMessage": "¿Estás seguro de que quieres eliminar \"{{title}}\"? Esta acción no se puede deshacer."
+    "deleteConfirmMessage": "¿Estás seguro de que quieres eliminar \"{{title}}\"? Esta acción no se puede deshacer.",
+    "clipboardClearFailed": "⚠️ No se pudo limpiar el portapapeles después de copiar: {{error}}. Tu secreto podría seguir en el portapapeles."
   },
   "editRecordModal": {
     "newRecord": "Nuevo Registro",
