@@ -25,9 +25,6 @@ export async function encryptPlaintext(
   const plaintextBytes = toUint8Array(plaintext);
   const { ciphertext } = encryptXChaCha20(key, plaintextBytes, nonce);
 
-  // Clear key from memory
-  key.fill(0);
-
   return {
     ciphertextBase64: toBase64(ciphertext),
     nonceBase64: toBase64(nonce),
@@ -50,9 +47,6 @@ export async function decryptPayload(
   const ciphertext = fromBase64(ciphertextBase64);
 
   const plaintextBytes = decryptXChaCha20(key, ciphertext, nonce);
-
-  // Clear key from memory
-  key.fill(0);
 
   return fromUint8Array(plaintextBytes);
 }
