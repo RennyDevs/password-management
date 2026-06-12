@@ -41,7 +41,7 @@ export async function upsertRecord(
   record: Omit<Record, 'created_at' | 'updated_at'> & { created_at?: string; updated_at?: string }
 ): Promise<void> {
   const now = new Date().toISOString();
-  const payload: Record<string, unknown> = {
+  const payload: { [key: string]: unknown } = {
     ...record,
     updated_at: now,
   };

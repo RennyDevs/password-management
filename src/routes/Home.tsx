@@ -1,197 +1,158 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import RecordList from '../components/RecordList';
 import EditRecordModal from '../components/EditRecordModal';
 import MasterPasswordModal from '../components/MasterPasswordModal';
-import Toast, { type ToastMessage } from '../components/Toast';
-import { fetchRecords, fetchFullRecord, deleteRecord, upsertRecord } from '../lib/storage/supabase';
-import { upsertRecordCache, deleteRecordCache } from '../lib/storage/indexeddb';
+import Toast from '../components/Toast';
 import { encryptPlaintext, decryptPayload } from '../lib/crypto';
+import { useUser } from '../lib/auth/UserContext';
 import { generateId } from '../lib/utils/uid';
-import type { RecordListItem, Record } from '../types/record';
-import { useUser } from '../App';
-
-let toastCounter = 0;
-function nextToastId(): string {
-  return `toast-${++toastCounter}`;
-}
+import { useRecords } from '../hooks/useRecords';
+import { useToast } from '../hooks/useToast';
+import type { Record } from '../types/record';
 
 export default function Home() {
   const { t } = useTranslation();
   const user = useUser();
-  const [records, setRecords] = useState<RecordListItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const { records, loading, persistRecord, deleteRecord: deleteRecordById, getFullRecord } = useRecords();
+  const { toasts, addToast, dismissToast } = useToast();
 
-  // Edit modal state
+  // ---- Edit modal state ----
+
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editSecret, setEditSecret] = useState('');
 
-  // Password prompt for encrypt on save
+  // ---- Master-password prompt state ----
+
   const [passwordPromptOpen, setPasswordPromptOpen] = useState(false);
+  const [passwordPurpose, setPasswordPurpose] = useState<'save' | 'edit'>('save');
+
+  // Pending-save payload (only set when purpose === 'save')
   const [pendingSave, setPendingSave] = useState<{ title: string; secret: string } | null>(null);
 
-  // Stable toast function — useRef avoids re-creating the callback on every render
-  const addToast = useCallback((text: string, type: ToastMessage['type'] = 'info') => {
-    const id = nextToastId();
-    setToasts((prev) => [...prev, { id, text, type }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
-  }, []);
+  // ---- Record CRUD ----
 
-  // Guard against duplicate calls from React StrictMode or rapid auth state changes
-  const loadedRef = useRef(false);
-  const userIdRef = useRef<string | null>(null);
-  const loadingRef = useRef(false);
-
-  const loadRecords = useCallback(async (force = false) => {
-    if (!user) return;
-    // Skip if already loading (prevents race conditions)
-    if (loadingRef.current) return;
-    // Skip duplicate initial loads (StrictMode double-fire), unless forced
-    if (!force && loadedRef.current && userIdRef.current === user.id) return;
-    userIdRef.current = user.id;
-    loadingRef.current = true;
-    setLoading(true);
-    try {
-      const data = await fetchRecords(user.id);
-      setRecords(data);
-      loadedRef.current = true;
-    } catch (err) {
-      addToast(t('home.failedLoadRecords'), 'error');
-      console.error('Load records error:', err);
-    } finally {
-      setLoading(false);
-      loadingRef.current = false;
-    }
-  }, [user]);
-
-  // Initial load + reload on visibility change (user switches back to this tab)
-  useEffect(() => {
-    loadRecords();
-
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        loadRecords(true);
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [loadRecords]);
-
-  // New record
-  const handleNewRecord = () => {
+  // Open empty creation form
+  const handleNewRecord = useCallback(() => {
     setEditingRecordId(null);
     setEditTitle('');
     setEditSecret('');
     setEditModalOpen(true);
-  };
+  }, []);
 
-  // Edit record
-  const handleEdit = async (recordId: string) => {
-    // Open password prompt first to decrypt
+  // Request decryption for an edit
+  const handleEdit = useCallback((recordId: string) => {
     setEditingRecordId(recordId);
     setPendingSave(null);
+    setPasswordPurpose('edit');
+    setEditModalOpen(false); // will open after decrypt
     setPasswordPromptOpen(true);
-  };
+  }, []);
 
-  const handlePasswordForEdit = async (password: string): Promise<boolean> => {
-    if (!editingRecordId) return false;
-    try {
-      const fullRecord = await fetchFullRecord(editingRecordId);
-      if (!fullRecord) {
-        addToast(t('home.recordNotFound'), 'error');
-        return false;
-      }
-
-      const plaintext = await decryptPayload(
-        password,
-        fullRecord.ciphertext,
-        fullRecord.nonce,
-        fullRecord.salt
-      );
-
-      setEditTitle(fullRecord.title);
-      setEditSecret(plaintext);
-      setEditModalOpen(true);
-      setPasswordPromptOpen(false);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const handleSaveRecord = async (title: string, secret: string) => {
+  // Save from modal → open master-password prompt
+  const handleSaveRecord = useCallback(async (title: string, secret: string): Promise<void> => {
     setPendingSave({ title, secret });
     setEditModalOpen(false);
+    setPasswordPurpose('save');
     setPasswordPromptOpen(true);
-  };
+  }, []);
 
-  const handlePasswordForSave = async (password: string): Promise<boolean> => {
-    if (!pendingSave) return false;
-    if (!user) {
-      addToast(t('home.mustBeLoggedIn'), 'error');
-      return false;
-    }
+  // ---- Master-password handlers ----
 
-    try {
-      const encrypted = await encryptPlaintext(password, pendingSave.secret);
+  const handlePasswordForSave = useCallback(
+    async (password: string): Promise<boolean> => {
+      if (!pendingSave || !user) return false;
 
-      const recordId = editingRecordId || generateId();
-      const now = new Date().toISOString();
+      try {
+        const encrypted = await encryptPlaintext(password, pendingSave.secret);
 
-      const record: Record = {
-        id: recordId,
-        user_id: user.id,
-        title: pendingSave.title,
-        ciphertext: encrypted.ciphertextBase64,
-        nonce: encrypted.nonceBase64,
-        salt: encrypted.saltBase64,
-        alg_version: encrypted.alg_version,
-        created_at: editingRecordId ? '' : now,
-        updated_at: now,
-      };
+        const recordId = editingRecordId || generateId();
+        const now = new Date().toISOString();
+        const isUpdate = editingRecordId !== null;
 
-      await upsertRecord(record);
-      await upsertRecordCache(record);
+        const record: Record = {
+          id: recordId,
+          user_id: user.id,
+          title: pendingSave.title,
+          ciphertext: encrypted.ciphertextBase64,
+          nonce: encrypted.nonceBase64,
+          salt: encrypted.saltBase64,
+          alg_version: encrypted.alg_version,
+          created_at: isUpdate ? '' : now,
+          updated_at: now,
+        };
 
-      addToast(
-        editingRecordId ? t('home.recordUpdated') : t('home.recordCreated'),
-        'success'
-      );
+        await persistRecord(record);
+        addToast(
+          isUpdate ? t('home.recordUpdated') : t('home.recordCreated'),
+          'success',
+        );
 
-      setPasswordPromptOpen(false);
-      setPendingSave(null);
-      setEditingRecordId(null);
-      await loadRecords();
-      return true;
-    } catch (err) {
-      addToast(t('home.failedSaveRecord'), 'error');
-      console.error('Save error:', err);
-      return false;
-    }
-  };
+        setPasswordPromptOpen(false);
+        setPendingSave(null);
+        setEditingRecordId(null);
+        return true;
+      } catch {
+        addToast(t('home.failedSaveRecord'), 'error');
+        return false;
+      }
+    },
+    [pendingSave, user, editingRecordId, persistRecord, addToast, t],
+  );
 
-  const handleDelete = async (recordId: string) => {
-    try {
-      await deleteRecord(recordId);
-      await deleteRecordCache(recordId);
-      setRecords((prev) => prev.filter((r) => r.id !== recordId));
-      addToast(t('home.recordDeleted'), 'success');
-    } catch (err) {
-      addToast(t('home.failedDeleteRecord'), 'error');
-      console.error('Delete error:', err);
-    }
-  };
+  const handlePasswordForEdit = useCallback(
+    async (password: string): Promise<boolean> => {
+      if (!editingRecordId) return false;
+
+      try {
+        const fullRecord = await getFullRecord(editingRecordId);
+        if (!fullRecord) {
+          addToast(t('home.recordNotFound'), 'error');
+          return false;
+        }
+
+        const plaintext = await decryptPayload(
+          password,
+          fullRecord.ciphertext,
+          fullRecord.nonce,
+          fullRecord.salt,
+        );
+
+        setEditTitle(fullRecord.title);
+        setEditSecret(plaintext);
+        setEditModalOpen(true);
+        setPasswordPromptOpen(false);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [editingRecordId, getFullRecord, addToast, t],
+  );
+
+  const handleDelete = useCallback(
+    async (recordId: string) => {
+      try {
+        await deleteRecordById(recordId);
+        addToast(t('home.recordDeleted'), 'success');
+      } catch {
+        addToast(t('home.failedDeleteRecord'), 'error');
+      }
+    },
+    [deleteRecordById, addToast, t],
+  );
+
+  // ---- Render ----
 
   if (!user) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('home.welcomeHeading')}</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            {t('home.welcomeHeading')}
+          </h2>
           <p className="text-gray-500 dark:text-gray-400">{t('home.welcomeText')}</p>
         </div>
       </div>
@@ -201,7 +162,9 @@ export default function Home() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('home.myRecords')}</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          {t('home.myRecords')}
+        </h2>
         <button
           onClick={handleNewRecord}
           className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
@@ -221,7 +184,6 @@ export default function Home() {
         onToast={addToast}
       />
 
-      {/* Edit/Create modal */}
       {editModalOpen && (
         <EditRecordModal
           title={editTitle}
@@ -235,11 +197,18 @@ export default function Home() {
         />
       )}
 
-      {/* Password prompt for encrypt/decrypt */}
       {passwordPromptOpen && (
         <MasterPasswordModal
-          title={pendingSave ? t('home.confirmMasterPasswordSave') : t('home.enterMasterPasswordEdit')}
-          onSubmit={pendingSave ? handlePasswordForSave : handlePasswordForEdit}
+          title={
+            passwordPurpose === 'save'
+              ? t('home.confirmMasterPasswordSave')
+              : t('home.enterMasterPasswordEdit')
+          }
+          onSubmit={
+            passwordPurpose === 'save'
+              ? handlePasswordForSave
+              : handlePasswordForEdit
+          }
           onCancel={() => {
             setPasswordPromptOpen(false);
             setPendingSave(null);
@@ -248,7 +217,7 @@ export default function Home() {
         />
       )}
 
-      <Toast messages={toasts} onDismiss={(id) => setToasts((prev) => prev.filter((t) => t.id !== id))} />
+      <Toast messages={toasts} onDismiss={dismissToast} />
     </div>
   );
 }

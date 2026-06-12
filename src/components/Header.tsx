@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { signOut } from '../lib/auth/supabaseAuth';
-import { useUser } from '../App';
+import { useUser } from '../lib/auth/UserContext';
 
 interface HeaderProps {
   onLogout: () => void;

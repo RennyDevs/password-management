@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useUser } from '../App';
+import { useUser } from '../lib/auth/UserContext';
 import { signOut, signOutGlobal } from '../lib/auth/supabaseAuth';
 
 interface SettingsProps {

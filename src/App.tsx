@@ -1,20 +1,19 @@
-import { useState, useEffect, useRef, useCallback, createContext, useContext } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { User } from '@supabase/supabase-js';
+import UserContext from './lib/auth/UserContext';
 import { signOut } from './lib/auth/supabaseAuth';
 import { onAuthStateChange } from './lib/auth/supabaseAuth';
 import { initSupabase } from './lib/storage/supabase';
 import { ensureSodiumReady } from './lib/crypto/sodiumWrapper';
 import { SessionTimer, SESSION_TIMEOUT_MS } from './lib/utils/timer';
+// Re-export useUser for convenience — other files should import from lib/auth/UserContext
+export { useUser } from './lib/auth/UserContext';
 import Header from './components/Header';
 import Auth from './routes/Auth';
 import Home from './routes/Home';
 import Settings from './routes/Settings';
 import ChangePassword from './routes/ChangePassword';
-
-// Context to provide user to all children
-const UserContext = createContext<User | null>(null);
-export const useUser = () => useContext(UserContext);
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
