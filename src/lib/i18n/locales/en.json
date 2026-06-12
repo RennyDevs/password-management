@@ -54,6 +54,7 @@
     "signedInAs": "Signed in as: {{email}}",
     "userId": "User ID: {{id}}",
     "signOut": "Sign Out",
+    "signOutGlobal": "Sign Out Everywhere",
     "notSignedIn": "Not signed in.",
     "security": "Security",
     "encryption": "Encryption:",
@@ -66,7 +67,10 @@
     "signOutConfirmTitle": "Sign Out",
     "signOutConfirmMessage": "Are you sure you want to sign out?",
     "cancel": "Cancel",
-    "signOutConfirmButton": "Sign Out"
+    "signOutConfirmButton": "Sign Out",
+    "signOutGlobalConfirmTitle": "Sign Out Everywhere",
+    "signOutGlobalConfirmMessage": "This will sign you out of ALL devices and sessions. You will need to log in again on every device. Are you sure?",
+    "signOutGlobalConfirmButton": "Sign Out Everywhere"
   },
   "changePassword": {
     "heading": "Change Password",

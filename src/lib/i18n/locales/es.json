@@ -54,6 +54,7 @@
     "signedInAs": "Sesión iniciada como: {{email}}",
     "userId": "ID de usuario: {{id}}",
     "signOut": "Cerrar sesión",
+    "signOutGlobal": "Cerrar sesión en todos lados",
     "notSignedIn": "No has iniciado sesión.",
     "security": "Seguridad",
     "encryption": "Cifrado:",
@@ -66,7 +67,10 @@
     "signOutConfirmTitle": "Cerrar sesión",
     "signOutConfirmMessage": "¿Estás seguro de que quieres cerrar sesión?",
     "cancel": "Cancelar",
-    "signOutConfirmButton": "Cerrar sesión"
+    "signOutConfirmButton": "Cerrar sesión",
+    "signOutGlobalConfirmTitle": "Cerrar sesión en todos lados",
+    "signOutGlobalConfirmMessage": "Esto cerrará tu sesión en TODOS los dispositivos y sesiones. Tendrás que iniciar sesión nuevamente en cada dispositivo. ¿Estás seguro?",
+    "signOutGlobalConfirmButton": "Cerrar sesión en todos lados"
   },
   "changePassword": {
     "heading": "Cambiar Contraseña",

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUser } from '../App';
-import { signOut } from '../lib/auth/supabaseAuth';
+import { signOut, signOutGlobal } from '../lib/auth/supabaseAuth';
 
 interface SettingsProps {
   onLogout: () => void;
@@ -11,9 +11,15 @@ export default function Settings({ onLogout }: SettingsProps) {
   const { t } = useTranslation();
   const user = useUser();
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
+  const [showGlobalSignOutConfirm, setShowGlobalSignOutConfirm] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
+    onLogout();
+  };
+
+  const handleGlobalSignOut = async () => {
+    await signOutGlobal();
     onLogout();
   };
 
@@ -33,12 +39,20 @@ export default function Settings({ onLogout }: SettingsProps) {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {t('settings.userId', { id: user.id })}
               </p>
-              <button
-                onClick={() => setShowSignOutConfirm(true)}
-                className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
-              >
-                {t('settings.signOut')}
-              </button>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <button
+                  onClick={() => setShowSignOutConfirm(true)}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                >
+                  {t('settings.signOut')}
+                </button>
+                <button
+                  onClick={() => setShowGlobalSignOutConfirm(true)}
+                  className="px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-colors text-sm"
+                >
+                  {t('settings.signOutGlobal')}
+                </button>
+              </div>
             </div>
           ) : (
             <p className="text-sm text-gray-500 dark:text-gray-400">{t('settings.notSignedIn')}</p>
@@ -97,6 +111,29 @@ export default function Settings({ onLogout }: SettingsProps) {
                 className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
               >
                 {t('settings.signOutConfirmButton')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showGlobalSignOutConfirm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('settings.signOutGlobalConfirmTitle')}</h4>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">{t('settings.signOutGlobalConfirmMessage')}</p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowGlobalSignOutConfirm(false)}
+                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                {t('settings.cancel')}
+              </button>
+              <button
+                onClick={handleGlobalSignOut}
+                className="px-4 py-2 rounded-lg bg-red-700 text-white hover:bg-red-800 transition-colors"
+              >
+                {t('settings.signOutGlobalConfirmButton')}
               </button>
             </div>
           </div>

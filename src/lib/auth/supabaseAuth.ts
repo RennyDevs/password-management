@@ -24,6 +24,11 @@ export async function signOut(): Promise<void> {
   if (error) throw error;
 }
 
+export async function signOutGlobal(): Promise<void> {
+  const { error } = await getSupabaseClient().auth.signOut({ scope: 'global' });
+  if (error) throw error;
+}
+
 export async function getCurrentUser(): Promise<User | null> {
   const { data } = await getSupabaseClient().auth.getUser();
   return data?.user || null;
