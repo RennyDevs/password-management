@@ -92,7 +92,10 @@
     "securityNotice": "🔒 Security Notice",
     "warningStrongPassword": "• Use a strong, unique password that you don't use elsewhere.",
     "warningSessionInvalidation": "• After changing your password, other active sessions may be invalidated.",
-    "warningLostPassword": "• If you forget your password, your encrypted data cannot be recovered."
+    "warningLostPassword": "• If you forget your password, your encrypted data cannot be recovered.",
+    "errorGeneric": "Failed to change password. Please try again.",
+    "errorInvalidCurrentPassword": "Current password is incorrect.",
+    "errorStaleSession": "Your session is too old. Please log out and log back in, then try again."
   },
   "recordList": {
     "loading": "Loading records...",

@@ -92,7 +92,10 @@
     "securityNotice": "🔒 Aviso de Seguridad",
     "warningStrongPassword": "• Usa una contraseña fuerte y única que no uses en otro lugar.",
     "warningSessionInvalidation": "• Después de cambiar tu contraseña, otras sesiones activas pueden ser invalidadas.",
-    "warningLostPassword": "• Si olvidas tu contraseña, tus datos cifrados no se podrán recuperar."
+    "warningLostPassword": "• Si olvidas tu contraseña, tus datos cifrados no se podrán recuperar.",
+    "errorGeneric": "No se pudo cambiar la contraseña. Inténtalo de nuevo.",
+    "errorInvalidCurrentPassword": "La contraseña actual es incorrecta.",
+    "errorStaleSession": "Tu sesión es demasiado antigua. Cierra sesión, vuelve a iniciarla e inténtalo de nuevo."
   },
   "recordList": {
     "loading": "Cargando registros...",

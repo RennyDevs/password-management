@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { updatePassword } from '../lib/auth/supabaseAuth';
 
 export default function ChangePassword() {
   const { t } = useTranslation();
@@ -60,15 +61,28 @@ export default function ChangePassword() {
 
     setSubmitting(true);
 
-    // Simulate API call — in production this would call your auth backend
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-
-    // For now, this is a UI placeholder. Backend integration to follow.
-    setSubmitting(false);
-    setSuccess(true);
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+    try {
+      await updatePassword(currentPassword, newPassword);
+      setSuccess(true);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err: unknown) {
+      let message = t('changePassword.errorGeneric');
+      if (err instanceof Error) {
+        const msg = err.message.toLowerCase();
+        if (msg.includes('invalid login credentials')) {
+          message = t('changePassword.errorInvalidCurrentPassword');
+        } else if (msg.includes('recent authentication') || msg.includes('reauthenticate')) {
+          message = t('changePassword.errorStaleSession');
+        } else {
+          message = err.message;
+        }
+      }
+      setError(message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputClass =
