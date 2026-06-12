@@ -151,7 +151,7 @@ export default function Home() {
         nonce: encrypted.nonceBase64,
         salt: encrypted.saltBase64,
         alg_version: encrypted.alg_version,
-        created_at: editingRecordId ? undefined as unknown as string : now,
+        created_at: editingRecordId ? '' : now,
         updated_at: now,
       };
 

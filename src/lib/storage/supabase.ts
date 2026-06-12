@@ -41,11 +41,14 @@ export async function upsertRecord(
   record: Omit<Record, 'created_at' | 'updated_at'> & { created_at?: string; updated_at?: string }
 ): Promise<void> {
   const now = new Date().toISOString();
-  const payload = {
+  const payload: Record<string, unknown> = {
     ...record,
     updated_at: now,
-    created_at: record.created_at || now,
   };
+  // Only set created_at for new records; omit on updates to preserve original
+  if (record.created_at) {
+    payload.created_at = record.created_at;
+  }
 
   const { error } = await getSupabaseClient()
     .from('records')
