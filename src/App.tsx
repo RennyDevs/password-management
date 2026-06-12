@@ -1,9 +1,11 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, useRef, useCallback, createContext, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { User } from '@supabase/supabase-js';
+import { signOut } from './lib/auth/supabaseAuth';
 import { onAuthStateChange } from './lib/auth/supabaseAuth';
 import { initSupabase } from './lib/storage/supabase';
 import { ensureSodiumReady } from './lib/crypto/sodiumWrapper';
+import { SessionTimer, SESSION_TIMEOUT_MS } from './lib/utils/timer';
 import Header from './components/Header';
 import Auth from './routes/Auth';
 import Home from './routes/Home';
@@ -60,10 +62,56 @@ export default function App() {
     return unsubscribe;
   }, []);
 
-  const handleLogout = () => {
+  const timerRef = useRef<SessionTimer | null>(null);
+
+  // Activity events to reset the session timer
+  const activityEvents = useRef<string[]>([
+    'mousedown', 'keydown', 'mousemove', 'touchstart',
+    'scroll', 'click', 'wheel'
+  ]);
+
+  const handleSessionTimeout = useCallback(async () => {
+    try {
+      await signOut();
+    } catch {
+      // ignore errors on forced logout
+    }
     setUser(null);
     setPage('home');
-  };
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    timerRef.current?.clear();
+    setUser(null);
+    setPage('home');
+  }, []);
+
+  // Start / stop session timer based on auth state
+  useEffect(() => {
+    if (user) {
+      const timer = new SessionTimer(SESSION_TIMEOUT_MS, handleSessionTimeout);
+      timerRef.current = timer;
+      timer.start();
+
+      // Reset timer on user activity
+      const resetOnActivity = () => timer.reset();
+      for (const ev of activityEvents.current) {
+        window.addEventListener(ev, resetOnActivity, { passive: true });
+      }
+
+      return () => {
+        timer.clear();
+        timerRef.current = null;
+        for (const ev of activityEvents.current) {
+          window.removeEventListener(ev, resetOnActivity);
+        }
+      };
+    } else {
+      // Not logged in — clear any running timer
+      timerRef.current?.clear();
+      timerRef.current = null;
+    }
+  }, [user, handleSessionTimeout]);
 
   if (initializing) {
     return (
@@ -126,8 +174,7 @@ export default function App() {
             <nav className="flex gap-6">
               <button
                 onClick={() => setPage('home')}
-                className={`py-3 text-sm font-medium border-b-2 transition-colors ${
-                  page === 'home'
+                className={`py-3 text-sm font-medium border-b-2 transition-colors ${page === 'home'
                     ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400'
                     : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
@@ -136,18 +183,16 @@ export default function App() {
               </button>
               <button
                 onClick={() => setPage('change-password')}
-                className={`py-3 text-sm font-medium border-b-2 transition-colors ${
-                  page === 'change-password'
+                className={`py-3 text-sm font-medium border-b-2 transition-colors ${page === 'change-password'
                     ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400'
                     : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
+                  }`}
               >
                 {t('app.navChangePassword')}
               </button>
               <button
                 onClick={() => setPage('settings')}
-                className={`py-3 text-sm font-medium border-b-2 transition-colors ${
-                  page === 'settings'
+                className={`py-3 text-sm font-medium border-b-2 transition-colors ${page === 'settings'
                     ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400'
                     : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}

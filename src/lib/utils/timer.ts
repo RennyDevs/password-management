@@ -28,4 +28,9 @@ export class SessionTimer {
   }
 }
 
-export const SESSION_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+function getTimeoutMs(): number {
+  const minutes = Number(import.meta.env.VITE_SESSION_TIMEOUT_MINUTES) || 5;
+  return minutes * 60 * 1000;
+}
+
+export const SESSION_TIMEOUT_MS = getTimeoutMs();
