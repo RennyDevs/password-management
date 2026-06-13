@@ -70,7 +70,7 @@ export function useRecords(): UseRecordsReturn {
   const persistRecord = useCallback(
     async (record: Record) => {
       await saveRecord(record);
-      await loadRecords();
+      await loadRecords(true);
     },
     [loadRecords],
   );

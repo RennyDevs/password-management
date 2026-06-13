@@ -59,9 +59,12 @@ export async function upsertRecord(
     ...record,
     updated_at: now,
   };
-  // Only set created_at for new records; omit on updates to preserve original
+  // Only set created_at for new records; omit on updates to preserve original.
+  // Strip falsy values (empty string, null, undefined) to avoid timestamp errors.
   if (record.created_at) {
     payload.created_at = record.created_at;
+  } else {
+    delete payload.created_at;
   }
 
   const { error } = await getSupabaseClient()
