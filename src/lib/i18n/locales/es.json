@@ -50,7 +50,11 @@
     "failedDeleteRecord": "Error al eliminar el registro",
     "confirmMasterPasswordSave": "Confirma tu Contraseña Maestra para Guardar",
     "enterMasterPasswordEdit": "Ingresa tu Contraseña Maestra para Editar",
-    "unexpectedError": "Ocurrió un error inesperado"
+    "unexpectedError": "Ocurrió un error inesperado",
+    "searchPlaceholder": "Buscar por título...",
+    "filterByTags": "Etiquetas",
+    "clearFilters": "Limpiar",
+    "showingResults": "Mostrando {{count}} de {{total}} registros"
   },
   "settings": {
     "heading": "Configuración",
@@ -60,6 +64,9 @@
     "signOut": "Cerrar sesión",
     "signOutGlobal": "Cerrar sesión en todos lados",
     "notSignedIn": "No has iniciado sesión.",
+    "data": "Datos",
+    "dataDescription": "Exporta tus registros para respaldo o importa desde una exportación anterior.",
+    "exportImport": "Exportar / Importar",
     "security": "Seguridad",
     "encryption": "Cifrado:",
     "keyDerivation": "Derivación de clave:",
@@ -139,6 +146,10 @@
     "secretLabel": "Secreto",
     "markdownHint": "(Markdown soportado)",
     "secretPlaceholder": "Ingresa el contenido secreto a cifrar (Markdown soportado)",
+    "tagsLabel": "Etiquetas",
+    "tagsHint": "(Presiona Enter o coma para agregar)",
+    "tagsPlaceholder": "Agregar etiqueta...",
+    "generatePassword": "Generar",
     "cancel": "Cancelar",
     "create": "Crear",
     "save": "Guardar",
@@ -173,5 +184,44 @@
   },
   "decryptRecord": {
     "recordNotFound": "Registro no encontrado"
+  },
+  "passwordGenerator": {
+    "title": "Generador de Contraseñas",
+    "strength": "Fortaleza",
+    "strengthWeak": "Débil",
+    "strengthFair": "Regular",
+    "strengthGood": "Buena",
+    "strengthStrong": "Fuerte",
+    "strengthVeryStrong": "Muy Fuerte",
+    "length": "Longitud",
+    "uppercase": "Mayúsculas",
+    "digits": "Dígitos",
+    "symbols": "Símbolos",
+    "regenerate": "Regenerar",
+    "cancel": "Cancelar",
+    "usePassword": "Usar Contraseña"
+  },
+  "exportImport": {
+    "title": "Exportar / Importar",
+    "description": "Exporta tus registros cifrados para respaldo o migración. Impórtalos de vuelta con verificación de contraseña maestra.",
+    "exportButton": "Exportar Registros",
+    "exportDescription": "Descarga todos tus registros como archivo JSON cifrado",
+    "importButton": "Importar Registros",
+    "importDescription": "Restaura registros desde un archivo de respaldo",
+    "close": "Cerrar",
+    "exportConfirmPassword": "Ingresa tu Contraseña Maestra para Exportar",
+    "exportComplete": "¡Exportación completa! El archivo se ha descargado.",
+    "exportSuccess": "Exportado(s) {{count}} registro(s) exitosamente.",
+    "exportError": "Error al exportar registros.",
+    "importConfirmPassword": "Ingresa tu Contraseña Maestra para Importar",
+    "importInvalidFormat": "Formato de archivo de respaldo inválido.",
+    "importEmptyFile": "El archivo de respaldo no contiene registros.",
+    "importParseError": "Error al procesar el archivo de respaldo.",
+    "importReadError": "Error al leer el archivo.",
+    "importComplete": "¡Importación completa!",
+    "importStats": "Importado(s) {{imported}} de {{total}} registro(s). {{skipped}} omitido(s).",
+    "importSuccess": "Importado(s) {{imported}} registro(s). {{skipped}} omitido(s).",
+    "verifyingPassword": "Verificando contraseña...",
+    "processingRecords": "Procesando registros..."
   }
 }

@@ -32,12 +32,18 @@ export function getSupabaseClient(): SupabaseClient {
 export async function fetchRecords(userId: string): Promise<RecordListItem[]> {
   const { data, error } = await getSupabaseClient()
     .from('records')
-    .select('id, title, created_at, updated_at')
+    .select('id, title, tags, created_at, updated_at')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data || [];
+  return (data || []).map((r: { [key: string]: unknown }) => ({
+    id: r.id as string,
+    title: r.title as string,
+    tags: (r.tags as string[]) ?? [],
+    created_at: r.created_at as string,
+    updated_at: r.updated_at as string,
+  }));
 }
 
 export async function fetchFullRecord(recordId: string): Promise<Record | null> {

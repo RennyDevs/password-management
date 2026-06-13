@@ -5,7 +5,7 @@ import type { Record, RecordListItem } from '../../types/record';
 const DB_NAME = 'passmgr';
 const STORE_RECORDS = 'records';
 const STORE_PENDING = 'pendingOps';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 // ---- Pending operation types ----
 
@@ -18,7 +18,7 @@ let dbPromise: Promise<IDBPDatabase> | null = null;
 function getDb(): Promise<IDBPDatabase> {
   if (!dbPromise) {
     dbPromise = openDB(DB_NAME, DB_VERSION, {
-      upgrade(db, oldVersion) {
+      upgrade(db, oldVersion, _newVersion, transaction) {
         if (!db.objectStoreNames.contains(STORE_RECORDS)) {
           const store = db.createObjectStore(STORE_RECORDS, { keyPath: 'id' });
           store.createIndex('user_id', 'user_id', { unique: false });
@@ -31,6 +31,13 @@ function getDb(): Promise<IDBPDatabase> {
               keyPath: 'id',
               autoIncrement: true,
             });
+          }
+        }
+        // v3: tags index (added to existing store via raw transaction)
+        if (oldVersion < 3 && transaction) {
+          const store = transaction.objectStore(STORE_RECORDS);
+          if (!store.indexNames.contains('tags')) {
+            store.createIndex('tags', 'tags', { unique: false, multiEntry: true });
           }
         }
       },
@@ -82,6 +89,7 @@ export async function getCachedRecordList(): Promise<RecordListItem[]> {
   return records.map((r) => ({
     id: r.id,
     title: r.title,
+    tags: r.tags ?? [],
     created_at: r.created_at,
     updated_at: r.updated_at,
   }));

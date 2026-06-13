@@ -6,6 +6,7 @@ import type { Record } from '../types/record';
 interface PendingSave {
   title: string;
   secret: string;
+  tags: string[];
 }
 
 export interface MasterPasswordHandlers {
@@ -30,9 +31,9 @@ export function useMasterPassword(handlers: MasterPasswordHandlers) {
   // ---- Openers ----
 
   const promptForSave = useCallback(
-    (recordId: string | null, title: string, secret: string) => {
+    (recordId: string | null, title: string, secret: string, tags: string[] = []) => {
       setEditingRecordId(recordId);
-      setPendingSave({ title, secret });
+      setPendingSave({ title, secret, tags });
       setPasswordPromptOpen(true);
     },
     [],
@@ -60,6 +61,7 @@ export function useMasterPassword(handlers: MasterPasswordHandlers) {
           nonce: encrypted.nonceBase64,
           salt: encrypted.saltBase64,
           alg_version: encrypted.alg_version,
+          tags: pendingSave.tags ?? [],
           created_at: isUpdate ? '' : now,
           updated_at: now,
         };

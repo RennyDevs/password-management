@@ -2,16 +2,33 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUser } from '../lib/auth/UserContext';
 import { signOut, signOutGlobal } from '../lib/auth/supabaseAuth';
+import ExportImportModal from '../components/ExportImportModal';
+import Toast from '../components/Toast';
+import type { ToastMessage } from '../components/Toast';
 
 interface SettingsProps {
   onLogout: () => void;
 }
+
+let toastId = 0;
 
 export default function Settings({ onLogout }: SettingsProps) {
   const { t } = useTranslation();
   const user = useUser();
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [showGlobalSignOutConfirm, setShowGlobalSignOutConfirm] = useState(false);
+  const [showExportImport, setShowExportImport] = useState(false);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  const addToast = (text: string, type: 'success' | 'error' | 'info') => {
+    const id = String(++toastId);
+    setToasts((prev) => [...prev, { id, text, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 5000);
+  };
+
+  const dismissToast = (id: string) => setToasts((prev) => prev.filter((t) => t.id !== id));
 
   const handleSignOut = async () => {
     await signOut();
@@ -57,6 +74,20 @@ export default function Settings({ onLogout }: SettingsProps) {
           ) : (
             <p className="text-sm text-gray-500 dark:text-gray-400">{t('settings.notSignedIn')}</p>
           )}
+        </div>
+
+        <hr className="border-gray-200 dark:border-gray-700" />
+
+        {/* Data section */}
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">{t('settings.data')}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{t('settings.dataDescription')}</p>
+          <button
+            onClick={() => setShowExportImport(true)}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+          >
+            {t('settings.exportImport')}
+          </button>
         </div>
 
         <hr className="border-gray-200 dark:border-gray-700" />
@@ -139,6 +170,15 @@ export default function Settings({ onLogout }: SettingsProps) {
           </div>
         </div>
       )}
+
+      {showExportImport && (
+        <ExportImportModal
+          onClose={() => setShowExportImport(false)}
+          onToast={addToast}
+        />
+      )}
+
+      <Toast messages={toasts} onDismiss={dismissToast} />
     </div>
   );
 }

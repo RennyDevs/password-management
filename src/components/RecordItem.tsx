@@ -67,6 +67,18 @@ export default function RecordItem({ record, onEdit, onDelete, onToast }: Record
             <h3 className="font-medium text-gray-900 dark:text-white truncate">
               {record.title}
             </h3>
+            {(record.tags?.length ?? 0) > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {record.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-block px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 text-[10px] rounded-full"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               {t('recordItem.created', { date: format(new Date(record.created_at), 'MMM d, yyyy HH:mm') })}
               {record.updated_at !== record.created_at &&

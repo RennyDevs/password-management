@@ -9,12 +9,15 @@ interface MasterPasswordModalProps {
   /** Return true on success, false if the password is wrong, or throw an Error for technical issues. */
   onSubmit: (password: string) => Promise<boolean>;
   onCancel: () => void;
+  /** Override the default "Verifying..." loading text. */
+  customLoading?: string;
 }
 
 export default function MasterPasswordModal({
   title,
   onSubmit,
   onCancel,
+  customLoading,
 }: MasterPasswordModalProps) {
   const { t } = useTranslation();
   const [password, setPassword] = useState('');
@@ -125,7 +128,7 @@ export default function MasterPasswordModal({
               disabled={loading}
               className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
             >
-              {loading ? t('masterPasswordModal.verifying') : t('masterPasswordModal.unlock')}
+              {loading ? (customLoading ?? t('masterPasswordModal.verifying')) : t('masterPasswordModal.unlock')}
             </button>
           </div>
         </form>

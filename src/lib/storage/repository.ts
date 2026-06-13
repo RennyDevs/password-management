@@ -71,6 +71,7 @@ export async function saveRecord(
     nonce: record.nonce,
     salt: record.salt,
     alg_version: record.alg_version,
+    tags: record.tags ?? [],
     created_at: record.created_at ?? new Date().toISOString(),
     updated_at: record.updated_at ?? new Date().toISOString(),
   };

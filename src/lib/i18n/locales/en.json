@@ -50,7 +50,11 @@
     "failedDeleteRecord": "Failed to delete record",
     "confirmMasterPasswordSave": "Confirm Master Password to Save",
     "enterMasterPasswordEdit": "Enter Master Password to Edit",
-    "unexpectedError": "An unexpected error occurred"
+    "unexpectedError": "An unexpected error occurred",
+    "searchPlaceholder": "Search by title...",
+    "filterByTags": "Tags",
+    "clearFilters": "Clear",
+    "showingResults": "Showing {{count}} of {{total}} records"
   },
   "settings": {
     "heading": "Settings",
@@ -60,6 +64,9 @@
     "signOut": "Sign Out",
     "signOutGlobal": "Sign Out Everywhere",
     "notSignedIn": "Not signed in.",
+    "data": "Data",
+    "dataDescription": "Export your records for backup or import from a previous export.",
+    "exportImport": "Export / Import",
     "security": "Security",
     "encryption": "Encryption:",
     "keyDerivation": "Key Derivation:",
@@ -139,6 +146,10 @@
     "secretLabel": "Secret",
     "markdownHint": "(Markdown supported)",
     "secretPlaceholder": "Enter the secret content to encrypt (Markdown supported)",
+    "tagsLabel": "Tags",
+    "tagsHint": "(Press Enter or comma to add)",
+    "tagsPlaceholder": "Add a tag...",
+    "generatePassword": "Generate",
     "cancel": "Cancel",
     "create": "Create",
     "save": "Save",
@@ -173,5 +184,44 @@
   },
   "decryptRecord": {
     "recordNotFound": "Record not found"
+  },
+  "passwordGenerator": {
+    "title": "Password Generator",
+    "strength": "Strength",
+    "strengthWeak": "Weak",
+    "strengthFair": "Fair",
+    "strengthGood": "Good",
+    "strengthStrong": "Strong",
+    "strengthVeryStrong": "Very Strong",
+    "length": "Length",
+    "uppercase": "Uppercase",
+    "digits": "Digits",
+    "symbols": "Symbols",
+    "regenerate": "Regenerate",
+    "cancel": "Cancel",
+    "usePassword": "Use Password"
+  },
+  "exportImport": {
+    "title": "Export / Import",
+    "description": "Export your encrypted records for backup or migration. Import them back with master password verification.",
+    "exportButton": "Export Records",
+    "exportDescription": "Download all your records as an encrypted JSON file",
+    "importButton": "Import Records",
+    "importDescription": "Restore records from a backup file",
+    "close": "Close",
+    "exportConfirmPassword": "Enter Master Password to Export",
+    "exportComplete": "Export complete! The file has been downloaded.",
+    "exportSuccess": "Exported {{count}} record(s) successfully.",
+    "exportError": "Failed to export records.",
+    "importConfirmPassword": "Enter Master Password to Import",
+    "importInvalidFormat": "Invalid backup file format.",
+    "importEmptyFile": "The backup file contains no records.",
+    "importParseError": "Failed to parse the backup file.",
+    "importReadError": "Failed to read the file.",
+    "importComplete": "Import complete!",
+    "importStats": "Imported {{imported}} of {{total}} record(s). {{skipped}} skipped.",
+    "importSuccess": "Imported {{imported}} record(s). {{skipped}} skipped.",
+    "verifyingPassword": "Verifying password...",
+    "processingRecords": "Processing records..."
   }
 }
