@@ -4,8 +4,7 @@ import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { RecordListItem } from '../types/record';
-import { fetchFullRecord } from '../lib/storage/supabase';
-import { decryptPayload } from '../lib/crypto';
+import { useDecryptRecord } from '../hooks/useDecryptRecord';
 import { copyToClipboard } from '../lib/utils/clipboard';
 import MasterPasswordModal from './MasterPasswordModal';
 import ConfirmModal from './ConfirmModal';
@@ -19,40 +18,25 @@ interface RecordItemProps {
 
 export default function RecordItem({ record, onEdit, onDelete, onToast }: RecordItemProps) {
   const { t } = useTranslation();
+  const { decryptRecord, error } = useDecryptRecord();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [decryptedSecret, setDecryptedSecret] = useState<string | null>(null);
   const [showSecret, setShowSecret] = useState(false);
-  const [error, setError] = useState('');
 
   const handleView = () => {
     setDecryptedSecret(null);
     setShowSecret(false);
-    setError('');
     setShowPasswordModal(true);
   };
 
   const handlePasswordSubmit = async (password: string): Promise<boolean> => {
-    try {
-      const fullRecord = await fetchFullRecord(record.id);
-      if (!fullRecord) {
-        setError(t('recordItem.recordNotFound'));
-        return false;
-      }
+    const result = await decryptRecord(record.id, password);
+    if (!result.success) return false;
 
-      const plaintext = await decryptPayload(
-        password,
-        fullRecord.ciphertext,
-        fullRecord.nonce,
-        fullRecord.salt
-      );
-
-      setDecryptedSecret(plaintext);
-      setShowPasswordModal(false);
-      return true;
-    } catch {
-      return false;
-    }
+    setDecryptedSecret(result.plaintext);
+    setShowPasswordModal(false);
+    return true;
   };
 
   const handleCopySecret = async () => {

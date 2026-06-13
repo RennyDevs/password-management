@@ -4,17 +4,19 @@ import RecordList from '../components/RecordList';
 import EditRecordModal from '../components/EditRecordModal';
 import MasterPasswordModal from '../components/MasterPasswordModal';
 import Toast from '../components/Toast';
-import { encryptPlaintext, decryptPayload } from '../lib/crypto';
+import { encryptPlaintext } from '../lib/crypto';
 import { useUser } from '../lib/auth/UserContext';
 import { generateId } from '../lib/utils/uid';
 import { useRecords } from '../hooks/useRecords';
+import { useDecryptRecord } from '../hooks/useDecryptRecord';
 import { useToast } from '../hooks/useToast';
 import type { Record } from '../types/record';
 
 export default function Home() {
   const { t } = useTranslation();
   const user = useUser();
-  const { records, loading, persistRecord, deleteRecord: deleteRecordById, getFullRecord } = useRecords();
+  const { records, loading, persistRecord, deleteRecord: deleteRecordById } = useRecords();
+  const { decryptRecord } = useDecryptRecord();
   const { toasts, addToast, dismissToast } = useToast();
 
   // ---- Edit modal state ----
@@ -106,30 +108,16 @@ export default function Home() {
     async (password: string): Promise<boolean> => {
       if (!editingRecordId) return false;
 
-      try {
-        const fullRecord = await getFullRecord(editingRecordId);
-        if (!fullRecord) {
-          addToast(t('home.recordNotFound'), 'error');
-          return false;
-        }
+      const result = await decryptRecord(editingRecordId, password);
+      if (!result.success) return false;
 
-        const plaintext = await decryptPayload(
-          password,
-          fullRecord.ciphertext,
-          fullRecord.nonce,
-          fullRecord.salt,
-        );
-
-        setEditTitle(fullRecord.title);
-        setEditSecret(plaintext);
-        setEditModalOpen(true);
-        setPasswordPromptOpen(false);
-        return true;
-      } catch {
-        return false;
-      }
+      setEditTitle(result.record.title);
+      setEditSecret(result.plaintext);
+      setEditModalOpen(true);
+      setPasswordPromptOpen(false);
+      return true;
     },
-    [editingRecordId, getFullRecord, addToast, t],
+    [editingRecordId, decryptRecord],
   );
 
   const handleDelete = useCallback(

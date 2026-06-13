@@ -2,9 +2,23 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Record, RecordListItem } from '../../types/record';
 
 let supabase: SupabaseClient | null = null;
+let initCalled = false;
 
+/**
+ * Lazy-safe Supabase client initialization.
+ *
+ * Subsequent calls with the same (or different) parameters are no-ops —
+ * the first invocation wins. This makes the function idempotent and safe
+ * to call from multiple places (e.g. App init + tests).
+ */
 export function initSupabase(url: string, anonKey: string): SupabaseClient {
-  supabase = createClient(url, anonKey);
+  if (!supabase) {
+    supabase = createClient(url, anonKey);
+  } else if (!initCalled) {
+    // Already created elsewhere (e.g. a previous App mount in dev mode
+    // with Fast Refresh), but flag wasn't set — fix the flag.
+  }
+  initCalled = true;
   return supabase;
 }
 

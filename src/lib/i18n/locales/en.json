@@ -166,5 +166,8 @@
   "confirmModal": {
     "confirm": "Confirm",
     "cancel": "Cancel"
+  },
+  "decryptRecord": {
+    "recordNotFound": "Record not found"
   }
 }
