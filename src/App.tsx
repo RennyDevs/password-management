@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { User } from '@supabase/supabase-js';
 import UserContext from './lib/auth/UserContext';
@@ -11,10 +11,10 @@ import { useOnlineSync } from './hooks/useOnlineSync';
 // Re-export useUser for convenience — other files should import from lib/auth/UserContext
 export { useUser } from './lib/auth/UserContext';
 import Header from './components/Header';
-import Auth from './routes/Auth';
-import Home from './routes/Home';
-import Settings from './routes/Settings';
-import ChangePassword from './routes/ChangePassword';
+const Auth = lazy(() => import('./routes/Auth'));
+const Home = lazy(() => import('./routes/Home'));
+const Settings = lazy(() => import('./routes/Settings'));
+const ChangePassword = lazy(() => import('./routes/ChangePassword'));
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -150,7 +150,15 @@ export default function App() {
   if (!user) {
     return (
       <UserContext.Provider value={null}>
-        <Auth onAuthSuccess={() => {/* Auth state change is handled by onAuthStateChange */}} />
+        <Suspense
+          fallback={
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+            </div>
+          }
+        >
+          <Auth onAuthSuccess={() => {/* Auth state change is handled by onAuthStateChange */}} />
+        </Suspense>
       </UserContext.Provider>
     );
   }
