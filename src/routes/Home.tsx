@@ -65,7 +65,9 @@ export default function Home() {
 
   const handlePasswordForSave = useCallback(
     async (password: string): Promise<boolean> => {
-      if (!pendingSave || !user) return false;
+      if (!pendingSave || !user) {
+        throw new Error(t('home.unexpectedError'));
+      }
 
       try {
         const encrypted = await encryptPlaintext(password, pendingSave.secret);
@@ -82,11 +84,11 @@ export default function Home() {
           nonce: encrypted.nonceBase64,
           salt: encrypted.saltBase64,
           alg_version: encrypted.alg_version,
-          created_at: isUpdate ? '' : now,
+          created_at: now,
           updated_at: now,
         };
 
-        await persistRecord(record);
+        await persistRecord(record, isUpdate);
         addToast(
           isUpdate ? t('home.recordUpdated') : t('home.recordCreated'),
           'success',
@@ -96,9 +98,11 @@ export default function Home() {
         setPendingSave(null);
         setEditingRecordId(null);
         return true;
-      } catch {
+      } catch (err) {
+        // Network / Supabase errors are technical, not password-related
+        console.error('handlePasswordForSave failed:', err);
         addToast(t('home.failedSaveRecord'), 'error');
-        return false;
+        throw new Error(t('home.failedSaveRecord'));
       }
     },
     [pendingSave, user, editingRecordId, persistRecord, addToast, t],
@@ -106,9 +110,13 @@ export default function Home() {
 
   const handlePasswordForEdit = useCallback(
     async (password: string): Promise<boolean> => {
-      if (!editingRecordId) return false;
+      if (!editingRecordId) {
+        throw new Error(t('home.unexpectedError'));
+      }
 
       const result = await decryptRecord(editingRecordId, password);
+      // decryptRecord returns { success: false } only when the password is wrong
+      // (decryption failed because the derived key didn't match)
       if (!result.success) return false;
 
       setEditTitle(result.record.title);

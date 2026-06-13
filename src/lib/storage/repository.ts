@@ -15,7 +15,7 @@ import {
   upsertRecordCache,
   deleteRecordCache,
   getCachedRecordList,
-  getRecord,
+  getRecord as getCachedRecord,
 } from './indexeddb';
 import type { Record, RecordListItem } from '../../types/record';
 
@@ -42,23 +42,44 @@ export async function saveRecord(
   record: Omit<Record, 'created_at' | 'updated_at'> & { created_at?: string; updated_at?: string }
 ): Promise<void> {
   await upsertRecord(record);
-  await upsertRecordCache({
-    id: record.id,
-    user_id: record.user_id,
-    title: record.title,
-    ciphertext: record.ciphertext,
-    nonce: record.nonce,
-    salt: record.salt,
-    alg_version: record.alg_version,
-    created_at: record.created_at ?? new Date().toISOString(),
-    updated_at: record.updated_at ?? new Date().toISOString(),
-  });
+  // IndexedDB cache is best-effort — don't let it break the main flow
+  try {
+    // For updates where created_at is not provided, fetch the existing record
+    // to get the original timestamp for the cache.
+    let createdAt = record.created_at;
+    if (!createdAt) {
+      try {
+        const existing = await getCachedRecord(record.id);
+        createdAt = existing?.created_at || new Date().toISOString();
+      } catch {
+        createdAt = new Date().toISOString();
+      }
+    }
+    await upsertRecordCache({
+      id: record.id,
+      user_id: record.user_id,
+      title: record.title,
+      ciphertext: record.ciphertext,
+      nonce: record.nonce,
+      salt: record.salt,
+      alg_version: record.alg_version,
+      created_at: createdAt,
+      updated_at: record.updated_at || new Date().toISOString(),
+    });
+  } catch {
+    // Cache write failed — non-critical
+  }
 }
 
 /** Delete a record from Supabase and the IndexedDB cache. */
 export async function removeRecord(recordId: string): Promise<void> {
   await deleteRecord(recordId);
-  await deleteRecordCache(recordId);
+  // Cache cleanup is best-effort
+  try {
+    await deleteRecordCache(recordId);
+  } catch {
+    // Cache delete failed — non-critical
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -77,5 +98,5 @@ export async function getCachedRecordListSafe(): Promise<RecordListItem[]> {
  * Return a single cached record, if available.
  */
 export async function getCachedRecordSafe(id: string): Promise<Record | undefined> {
-  return getRecord(id);
+  return getCachedRecord(id);
 }

@@ -46,7 +46,8 @@
     "recordDeleted": "Registro eliminado",
     "failedDeleteRecord": "Error al eliminar el registro",
     "confirmMasterPasswordSave": "Confirma tu Contraseña Maestra para Guardar",
-    "enterMasterPasswordEdit": "Ingresa tu Contraseña Maestra para Editar"
+    "enterMasterPasswordEdit": "Ingresa tu Contraseña Maestra para Editar",
+    "unexpectedError": "Ocurrió un error inesperado"
   },
   "settings": {
     "heading": "Configuración",

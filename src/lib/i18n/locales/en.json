@@ -46,7 +46,8 @@
     "recordDeleted": "Record deleted",
     "failedDeleteRecord": "Failed to delete record",
     "confirmMasterPasswordSave": "Confirm Master Password to Save",
-    "enterMasterPasswordEdit": "Enter Master Password to Edit"
+    "enterMasterPasswordEdit": "Enter Master Password to Edit",
+    "unexpectedError": "An unexpected error occurred"
   },
   "settings": {
     "heading": "Settings",

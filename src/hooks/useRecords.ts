@@ -12,8 +12,8 @@ interface UseRecordsReturn {
   records: RecordListItem[];
   loading: boolean;
   loadRecords: (force?: boolean) => Promise<void>;
-  /** Persist a new or updated record (already encrypted). */
-  persistRecord: (record: Record) => Promise<void>;
+  /** Persist a new or updated record (already encrypted). Pass isUpdate=true to omit created_at on updates. */
+  persistRecord: (record: Record, isUpdate?: boolean) => Promise<void>;
   deleteRecord: (recordId: string) => Promise<void>;
   getFullRecord: (recordId: string) => Promise<Record | null>;
 }
@@ -68,8 +68,13 @@ export function useRecords(): UseRecordsReturn {
   // ---- CRUD operations ----
 
   const persistRecord = useCallback(
-    async (record: Record) => {
-      await saveRecord(record);
+    async (record: Record, isUpdate = false) => {
+      // For updates: omit created_at so Supabase keeps the original timestamp.
+      // For new records: include created_at.
+      const payload = isUpdate
+        ? { ...record, created_at: undefined }
+        : record;
+      await saveRecord(payload as Record);
       await loadRecords(true);
     },
     [loadRecords],

@@ -6,6 +6,7 @@ const BASE_DELAY_MS = 1000;
 
 interface MasterPasswordModalProps {
   title: string;
+  /** Return true on success, false if the password is wrong, or throw an Error for technical issues. */
   onSubmit: (password: string) => Promise<boolean>;
   onCancel: () => void;
 }
@@ -53,6 +54,7 @@ export default function MasterPasswordModal({
         setAttempts(0);
         setPassword('');
       } else {
+        // Password was wrong — apply rate limit
         const newAttempts = attempts + 1;
         setAttempts(newAttempts);
         setPassword('');
@@ -71,7 +73,11 @@ export default function MasterPasswordModal({
         setTimeout(() => inputRef.current?.focus(), 100);
       }
     } catch (err) {
-      setError(t('masterPasswordModal.errorGeneric'));
+      // Technical error (network, crypto, etc.) — do NOT count as a password attempt
+      const message = err instanceof Error ? err.message : t('masterPasswordModal.errorGeneric');
+      setError(message);
+      setPassword('');
+      setTimeout(() => inputRef.current?.focus(), 100);
     } finally {
       setLoading(false);
     }
