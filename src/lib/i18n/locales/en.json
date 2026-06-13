@@ -28,6 +28,9 @@
     "configRequiredText": "Please set the following environment variables:",
     "configFileHint": "Create a <code>.env</code> file in the project root.",
     "cryptoWarning": "⚠️ Cryptographic library not fully initialized. Some features may not work.",
+    "offlineBanner": "You are offline. Changes will be saved locally and synced when back online.",
+    "syncingPending": "Syncing {{count}} pending change(s)...",
+    "pendingSyncCount": "{{count}} pending",
     "navRecords": "Records",
     "navChangePassword": "Change Password",
     "navSettings": "Settings"

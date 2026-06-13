@@ -7,6 +7,7 @@ import { onAuthStateChange } from './lib/auth/supabaseAuth';
 import { initSupabase } from './lib/storage/supabase';
 import { ensureSodiumReady } from './lib/crypto/sodiumWrapper';
 import { SessionTimer, SESSION_TIMEOUT_MS } from './lib/utils/timer';
+import { useOnlineSync } from './hooks/useOnlineSync';
 // Re-export useUser for convenience — other files should import from lib/auth/UserContext
 export { useUser } from './lib/auth/UserContext';
 import Header from './components/Header';
@@ -26,6 +27,7 @@ export default function App() {
   const [page, setPage] = useState<Page>('home');
   const [initializing, setInitializing] = useState(true);
   const [sodiumReady, setSodiumReady] = useState(false);
+  const { isOnline, pendingCount } = useOnlineSync();
 
   useEffect(() => {
     async function init() {
@@ -163,6 +165,33 @@ export default function App() {
           <div className="max-w-4xl mx-auto px-4 py-3">
             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-sm text-amber-700 dark:text-amber-300">
               {t('app.cryptoWarning')}
+            </div>
+          </div>
+        )}
+
+        {/* Offline indicator */}
+        {!isOnline && (
+          <div className="max-w-4xl mx-auto px-4 py-3">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 text-sm text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M9.172 16.172a4 4 0 015.656 0M7.05 11.05a7 7 0 019.9 0M4.929 6.93a10 10 0 0114.142 0" />
+              </svg>
+              <span>{t('app.offlineBanner')}</span>
+              {pendingCount > 0 && (
+                <span className="ml-1">· {t('app.pendingSyncCount', { count: pendingCount })}</span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Online-again sync banner (transient) */}
+        {isOnline && pendingCount > 0 && (
+          <div className="max-w-4xl mx-auto px-4 py-3">
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 text-sm text-green-700 dark:text-green-300 flex items-center gap-2">
+              <svg className="w-4 h-4 flex-shrink-0 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span>{t('app.syncingPending', { count: pendingCount })}</span>
             </div>
           </div>
         )}

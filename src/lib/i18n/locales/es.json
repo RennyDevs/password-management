@@ -28,6 +28,9 @@
     "configRequiredText": "Establece las siguientes variables de entorno:",
     "configFileHint": "Crea un archivo <code>.env</code> en la raíz del proyecto.",
     "cryptoWarning": "⚠️ La librería criptográfica no se inicializó completamente. Es posible que algunas funciones no funcionen.",
+    "offlineBanner": "Estás sin conexión. Los cambios se guardarán localmente y se sincronizarán al volver.",
+    "syncingPending": "Sincronizando {{count}} cambio(s) pendiente(s)...",
+    "pendingSyncCount": "{{count}} pendiente(s)",
     "navRecords": "Registros",
     "navChangePassword": "Cambiar Contraseña",
     "navSettings": "Configuración"

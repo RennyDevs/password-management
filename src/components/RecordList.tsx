@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { RecordListItem } from '../types/record';
 import RecordItem from './RecordItem';
+import VirtualList from './VirtualList';
 
 interface RecordListProps {
   records: RecordListItem[];
@@ -10,8 +11,17 @@ interface RecordListProps {
   onToast: (text: string, type: 'success' | 'error' | 'info') => void;
 }
 
+/**
+ * Estimated row height for a collapsed RecordItem (title + meta + buttons).
+ * When a secret is decrypted inline the item expands beyond this height;
+ * that's acceptable because it's a transient UI state and most rows stay
+ * collapsed.
+ */
+const RECORD_ITEM_HEIGHT = 76;
+
 export default function RecordList({ records, loading, onEdit, onDelete, onToast }: RecordListProps) {
   const { t } = useTranslation();
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -31,6 +41,29 @@ export default function RecordList({ records, loading, onEdit, onDelete, onToast
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           {t('recordList.noRecordsText')}
         </p>
+      </div>
+    );
+  }
+
+  // Use virtualisation for large lists; plain render for small ones (<50)
+  if (records.length >= 50) {
+    return (
+      <div className="h-[70vh]">
+        <VirtualList
+          items={records}
+          rowHeight={RECORD_ITEM_HEIGHT}
+          overscan={5}
+          renderItem={(record) => (
+            <div className="px-0.5 py-1">
+              <RecordItem
+                record={record}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onToast={onToast}
+              />
+            </div>
+          )}
+        />
       </div>
     );
   }
