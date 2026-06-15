@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePassword, estimateStrength, DEFAULT_LENGTH } from '../lib/utils/passwordGenerator';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface PasswordGeneratorModalProps {
   onSelect: (password: string) => void;
@@ -32,11 +33,18 @@ export default function PasswordGeneratorModal({ onSelect, onCancel }: PasswordG
   }[strength.label];
 
   const lengthPresets = [8, 12, 16, 20, 24, 32, 48, 64];
+  const focusTrapRef = useFocusTrap(true);
 
   return (
     <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+      <div
+        ref={focusTrapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="password-generator-title"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6"
+      >
+        <h3 id="password-generator-title" className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           {t('passwordGenerator.title')}
         </h3>
 
@@ -50,6 +58,7 @@ export default function PasswordGeneratorModal({ onSelect, onCancel }: PasswordG
             onClick={regenerate}
             className="px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-gray-700 dark:text-gray-300 flex-shrink-0"
             title={t('passwordGenerator.regenerate')}
+            aria-label={t('passwordGenerator.regenerate')}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

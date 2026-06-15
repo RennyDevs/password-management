@@ -5,6 +5,7 @@ import { getUserFullRecord, saveRecord } from '../lib/storage/repository';
 import { fetchRecords } from '../lib/storage/supabase';
 import { decryptPayload, encryptPlaintext } from '../lib/crypto';
 import { useRecords } from '../hooks/useRecords';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import MasterPasswordModal from './MasterPasswordModal';
 import type { ExportPayload, ExportRecord } from '../types/record';
 
@@ -31,6 +32,7 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
     skipped: 0,
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const focusTrapRef = useFocusTrap(step !== 'export-password' && step !== 'import-password');
 
   // ---- Export ----
 
@@ -216,8 +218,14 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
   return (
     <>
       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div
+          ref={focusTrapRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="export-import-title"
+          className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6"
+        >
+          <h3 id="export-import-title" className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             {t('exportImport.title')}
           </h3>
 

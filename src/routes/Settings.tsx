@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUser } from '../lib/auth/UserContext';
 import { signOut, signOutGlobal } from '../lib/auth/supabaseAuth';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import ExportImportModal from '../components/ExportImportModal';
 import Toast from '../components/Toast';
 import type { ToastMessage } from '../components/Toast';
@@ -39,6 +40,23 @@ export default function Settings({ onLogout }: SettingsProps) {
     await signOutGlobal();
     onLogout();
   };
+
+  const signOutFocusTrapRef = useFocusTrap(showSignOutConfirm);
+  const globalSignOutFocusTrapRef = useFocusTrap(showGlobalSignOutConfirm);
+
+  const handleEscape = useCallback(() => {
+    if (showSignOutConfirm) setShowSignOutConfirm(false);
+    if (showGlobalSignOutConfirm) setShowGlobalSignOutConfirm(false);
+  }, [showSignOutConfirm, showGlobalSignOutConfirm]);
+
+  useEffect(() => {
+    if (!showSignOutConfirm && !showGlobalSignOutConfirm) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleEscape();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [showSignOutConfirm, showGlobalSignOutConfirm, handleEscape]);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -127,8 +145,14 @@ export default function Settings({ onLogout }: SettingsProps) {
 
       {showSignOutConfirm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('settings.signOutConfirmTitle')}</h4>
+          <div
+            ref={signOutFocusTrapRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sign-out-confirm-title"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6"
+          >
+            <h4 id="sign-out-confirm-title" className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('settings.signOutConfirmTitle')}</h4>
             <p className="text-gray-600 dark:text-gray-300 mb-6">{t('settings.signOutConfirmMessage')}</p>
             <div className="flex justify-end gap-3">
               <button
@@ -150,8 +174,14 @@ export default function Settings({ onLogout }: SettingsProps) {
 
       {showGlobalSignOutConfirm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('settings.signOutGlobalConfirmTitle')}</h4>
+          <div
+            ref={globalSignOutFocusTrapRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="global-sign-out-confirm-title"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6"
+          >
+            <h4 id="global-sign-out-confirm-title" className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('settings.signOutGlobalConfirmTitle')}</h4>
             <p className="text-gray-600 dark:text-gray-300 mb-6">{t('settings.signOutGlobalConfirmMessage')}</p>
             <div className="flex justify-end gap-3">
               <button

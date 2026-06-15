@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface ConfirmModalProps {
   title: string;
@@ -22,10 +23,20 @@ export default function ConfirmModal({
   const { t } = useTranslation();
   const resolvedConfirmLabel = confirmLabel ?? t('confirmModal.confirm');
   const resolvedCancelLabel = cancelLabel ?? t('confirmModal.cancel');
+  const focusTrapRef = useFocusTrap(true);
+
+  const titleId = 'confirm-modal-title';
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{title}</h2>
+      <div
+        ref={focusTrapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6"
+      >
+        <h2 id={titleId} className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{title}</h2>
         <p className="text-gray-600 dark:text-gray-300 mb-6">{message}</p>
         <div className="flex justify-end gap-3">
           <button

@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import MarkdownEditor from './MarkdownEditor';
 import PasswordGeneratorModal from './PasswordGeneratorModal';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface EditRecordModalProps {
   title: string;
@@ -80,10 +81,19 @@ export default function EditRecordModal({
     setShowGenerator(false);
   };
 
+  const focusTrapRef = useFocusTrap(true);
+  const titleId = 'edit-record-modal-title';
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+      <div
+        ref={focusTrapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto"
+      >
+        <h2 id={titleId} className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           {mode === 'create' ? t('editRecordModal.newRecord') : t('editRecordModal.editRecord')}
         </h2>
         <form onSubmit={handleSubmit}>

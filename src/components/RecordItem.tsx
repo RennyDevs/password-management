@@ -117,18 +117,21 @@ export default function RecordItem({ record, onEdit, onDelete, onToast }: Record
                 <button
                   onClick={() => setShowSecret(!showSecret)}
                   className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                  aria-label={showSecret ? t('recordItem.hide') : t('recordItem.show')}
                 >
                   {showSecret ? t('recordItem.hide') : t('recordItem.show')}
                 </button>
                 <button
                   onClick={handleCopySecret}
                   className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                  aria-label={t('recordItem.copy')}
                 >
                   {t('recordItem.copy')}
                 </button>
                 <button
                   onClick={() => { setDecryptedSecret(null); setShowSecret(false); }}
                   className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  aria-label={t('recordItem.clear')}
                 >
                   {t('recordItem.clear')}
                 </button>

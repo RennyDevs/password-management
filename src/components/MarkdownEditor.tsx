@@ -91,6 +91,8 @@ export default function MarkdownEditor({
         {/* Preview panel */}
         {(activeTab === 'preview' || activeTab === 'split') && (
           <div
+            role="region"
+            aria-label={t('markdownEditor.preview')}
             className={`${
               activeTab === 'split' ? 'w-1/2' : 'w-full'
             } px-3 py-2 overflow-auto prose prose-sm dark:prose-invert max-w-none prose-headings:text-gray-900 dark:prose-headings:text-white prose-a:text-indigo-600 dark:prose-a:text-indigo-400 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:bg-gray-100 dark:prose-code:bg-gray-700 prose-code:text-sm prose-pre:bg-gray-100 dark:prose-pre:bg-gray-700`}

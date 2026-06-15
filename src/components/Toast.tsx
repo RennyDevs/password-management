@@ -11,7 +11,7 @@ interface ToastProps {
 
 export default function Toast({ messages, onDismiss }: ToastProps) {
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
+    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2" role="status" aria-live="polite" aria-atomic="true">
       {messages.map((msg) => (
         <div
           key={msg.id}
@@ -24,7 +24,7 @@ export default function Toast({ messages, onDismiss }: ToastProps) {
           }`}
         >
           <div className="flex items-center justify-between gap-2">
-            <span>{msg.text}</span>
+            <span role="alert">{msg.text}</span>
             <button
               onClick={() => onDismiss(msg.id)}
               className="text-white/80 hover:text-white ml-2"
