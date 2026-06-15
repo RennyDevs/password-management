@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { logger } from '../lib/utils/logger';
 import RecordList from '../components/RecordList';
 import EditRecordModal from '../components/EditRecordModal';
 import MasterPasswordModal from '../components/MasterPasswordModal';
@@ -108,7 +109,7 @@ export default function Home() {
         return true;
       } catch (err) {
         // Network / Supabase errors are technical, not password-related
-        console.error('handlePasswordForSave failed:', err);
+        logger.error('handlePasswordForSave failed', err);
         addToast(t('home.failedSaveRecord'), 'error');
         throw new Error(t('home.failedSaveRecord'));
       }

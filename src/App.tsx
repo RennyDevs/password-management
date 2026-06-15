@@ -8,6 +8,7 @@ import { initSupabase } from './lib/storage/supabase';
 import { ensureSodiumReady } from './lib/crypto/sodiumWrapper';
 import { SessionTimer, SESSION_TIMEOUT_MS } from './lib/utils/timer';
 import { useOnlineSync } from './hooks/useOnlineSync';
+import { logger } from './lib/utils/logger';
 // Re-export useUser for convenience — other files should import from lib/auth/UserContext
 export { useUser } from './lib/auth/UserContext';
 import Header from './components/Header';
@@ -33,9 +34,7 @@ export default function App() {
     async function init() {
       // Initialize Supabase
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-        console.error(
-          'VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables are required.'
-        );
+        logger.error('VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables are required.');
         setInitializing(false);
         return;
       }
@@ -47,7 +46,7 @@ export default function App() {
         await ensureSodiumReady();
         setSodiumReady(true);
       } catch (err) {
-        console.error('Failed to initialize libsodium:', err);
+        logger.error('Failed to initialize libsodium', err);
       }
 
       setInitializing(false);
@@ -157,7 +156,7 @@ export default function App() {
             </div>
           }
         >
-          <Auth onAuthSuccess={() => {/* Auth state change is handled by onAuthStateChange */}} />
+          <Auth />
         </Suspense>
       </UserContext.Provider>
     );

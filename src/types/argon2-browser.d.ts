@@ -1,18 +1,12 @@
 declare module 'argon2-browser/dist/argon2-bundled.min.js' {
-  export enum ArgonType {
-    Argon2d = 0,
-    Argon2i = 1,
-    Argon2id = 2,
-  }
-
   export interface Argon2HashOptions {
     pass: string | Uint8Array;
     salt: Uint8Array;
     time?: number;
     mem?: number;
     parallelism?: number;
+    type?: number;
     hashLen?: number;
-    type?: ArgonType;
   }
 
   export interface Argon2HashResult {
@@ -21,7 +15,11 @@ declare module 'argon2-browser/dist/argon2-bundled.min.js' {
     encoded: string;
   }
 
+  export const ArgonType: {
+    Argon2d: number;
+    Argon2i: number;
+    Argon2id: number;
+  };
+
   export function hash(options: Argon2HashOptions): Promise<Argon2HashResult>;
-  export function verify(options: { pass: string | Uint8Array; encoded: string; type?: ArgonType }): Promise<void>;
-  export function unloadRuntime(): void;
 }

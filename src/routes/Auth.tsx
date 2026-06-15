@@ -7,11 +7,7 @@ import {
   processFailedAttempt,
 } from '../lib/utils/rateLimit';
 
-interface AuthProps {
-  onAuthSuccess: () => void;
-}
-
-export default function Auth({ onAuthSuccess }: AuthProps) {
+export default function Auth() {
   const { t } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -72,7 +68,6 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
       }
       // Reset rate limit on success
       setRateLimit({ attempts: 0, lockedUntil: null });
-      onAuthSuccess();
     } catch (err) {
       const { state, remaining, lockedSeconds } = processFailedAttempt(rateLimit);
       setRateLimit(state);

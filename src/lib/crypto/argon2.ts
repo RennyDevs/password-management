@@ -56,7 +56,7 @@ export async function deriveKeyArgon2(
     });
     return new Uint8Array(result.hash);
   } catch (err) {
-    console.error('Argon2 failed, falling back to PBKDF2:', err);
+    console.warn('Argon2 failed, falling back to PBKDF2:', err);
     return deriveKeyPbkdf2(password, salt);
   }
 }
