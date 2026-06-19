@@ -15,6 +15,14 @@ export type PendingOp =
 
 let dbPromise: Promise<IDBPDatabase> | null = null;
 
+/**
+ * Reset the cached database connection (used in tests).
+ * The next call to any storage function will open a fresh connection.
+ */
+export function resetDb(): void {
+  dbPromise = null;
+}
+
 function getDb(): Promise<IDBPDatabase> {
   if (!dbPromise) {
     dbPromise = openDB(DB_NAME, DB_VERSION, {
