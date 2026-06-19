@@ -39,6 +39,10 @@ export default function RecordList({ records, loading, onEdit, onDelete, onToast
     (e: React.KeyboardEvent) => {
       if (records.length === 0) return;
 
+      // Ignore keyboard events that originate inside a modal (dialog) —
+      // e.g., the MasterPasswordModal that sits inside a RecordItem.
+      if ((e.target as HTMLElement)?.closest('[role="dialog"]')) return;
+
       const ids = getRecordIds();
       const currentId = (e.target as HTMLElement)?.closest('[data-record-item]')?.getAttribute('data-record-item');
       const currentIndex = currentId ? ids.indexOf(currentId) : -1;
