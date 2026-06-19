@@ -1,19 +1,9 @@
 -- ============================================================================
--- bootstrap.sql — Apply all versioned migrations in order.
---
--- This script is intended for initial project setup only.
--- For schema changes on an existing database, use supabase/migrations/
--- and apply them individually in numeric order.
---
--- Usage:
---   1. Open Supabase SQL Editor
---   2. Copy and paste this entire file
---   3. Execute
+-- Migration 00001: Create records table and initial RLS policies
+-- Date: 2026-06-19
 -- ============================================================================
 
--- Migration 00001: Create records table and RLS policies
--- -------------------------------------------------------
-
+-- 1. Create the records table
 CREATE TABLE IF NOT EXISTS public.records (
   id UUID PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -27,38 +17,31 @@ CREATE TABLE IF NOT EXISTS public.records (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 2. Enable Row Level Security
 ALTER TABLE public.records ENABLE ROW LEVEL SECURITY;
 
--- RLS: SELECT
+-- 3. RLS: SELECT — users can only see their own records
 CREATE POLICY "Users can view own records"
   ON public.records FOR SELECT
   USING (auth.uid() = user_id);
 
--- RLS: INSERT
+-- 4. RLS: INSERT — users can insert their own records
 CREATE POLICY "Users can insert own records"
   ON public.records FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
--- RLS: UPDATE
+-- 5. RLS: UPDATE — users can update their own records
 CREATE POLICY "Users can update own records"
   ON public.records FOR UPDATE
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
--- RLS: DELETE
+-- 6. RLS: DELETE — users can delete their own records
 CREATE POLICY "Users can delete own records"
   ON public.records FOR DELETE
   USING (auth.uid() = user_id);
 
--- Indexes
-CREATE INDEX IF NOT EXISTS idx_records_user_id    ON public.records(user_id);
-CREATE INDEX IF NOT EXISTS idx_records_created_at ON public.records(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_records_tags       ON public.records USING GIN(tags);
-
--- Migration 00002: Triggers
--- -------------------------------------------------------
-
--- Trigger: prevent user_id from being changed on update
+-- 7. Trigger: prevent user_id from being changed on update
 CREATE OR REPLACE FUNCTION public.prevent_user_id_change()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -75,17 +58,7 @@ CREATE TRIGGER trg_records_prevent_user_id_change
   FOR EACH ROW
   EXECUTE FUNCTION public.prevent_user_id_change();
 
--- Trigger: auto-update updated_at
-CREATE OR REPLACE FUNCTION public.set_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-DROP TRIGGER IF EXISTS trg_records_set_updated_at ON public.records;
-CREATE TRIGGER trg_records_set_updated_at
-  BEFORE UPDATE ON public.records
-  FOR EACH ROW
-  EXECUTE FUNCTION public.set_updated_at();
+-- 8. Indexes
+CREATE INDEX IF NOT EXISTS idx_records_user_id    ON public.records(user_id);
+CREATE INDEX IF NOT EXISTS idx_records_created_at ON public.records(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_records_tags       ON public.records USING GIN(tags);

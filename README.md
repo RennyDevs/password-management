@@ -13,7 +13,7 @@ A web-based password manager with End-to-End Encryption (E2EE). Built with React
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 18+ (or Docker / Docker Compose)
 - A Supabase account (free tier works)
 
 ## Setup
@@ -29,7 +29,9 @@ npm install
 
 1. Create a project at [supabase.com](https://supabase.com)
 2. Enable Auth with email/password provider
-3. Run the SQL script in `scripts/init-supabase.sql` in the Supabase SQL editor
+3. Run the SQL scripts to set up the database:
+   - **New project**: Run `scripts/init-supabase.sql` in the Supabase SQL editor
+   - **Existing project**: Apply migrations individually via `scripts/migrate.sh` (requires direct DB access) or manually copy the content of each file in `supabase/migrations/` in numeric order
 4. Get your Supabase URL and anon key from Project Settings > API
 
 ### 3. Environment Variables
@@ -41,11 +43,19 @@ VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key-here
 ```
 
-### 4. Run
+### 4. Run (Native)
 
 ```bash
 npm run dev
 ```
+
+### 4b. Run (Docker)
+
+```bash
+docker compose up --build
+```
+
+The app will be available at `http://localhost:5173`. Hot-reload works inside the container.
 
 ## Build
 
@@ -53,6 +63,38 @@ npm run dev
 npm run build
 npm run preview
 ```
+
+## Database Migrations
+
+Migrations are located in `supabase/migrations/` and are applied in numeric order.
+
+### Applying migrations via the CLI helper
+
+```bash
+# List available migrations with status
+./scripts/migrate.sh list
+
+# Apply a specific migration (by number)
+./scripts/migrate.sh apply 00001
+./scripts/migrate.sh apply 1         # padded automatically
+
+# Apply all pending migrations
+./scripts/migrate.sh apply:all
+```
+
+**Prerequisite**: Set the `SUPABASE_DB_URL` environment variable (a PostgreSQL connection string with superuser privileges) in `.env`:
+
+```env
+SUPABASE_DB_URL=postgresql://postgres:password@db.abcdef.supabase.co:5432/postgres
+```
+
+### Manual application
+
+Copy the content of each migration file from `supabase/migrations/` in numeric order and execute it in the Supabase SQL Editor.
+
+### Migration tracking
+
+The first time a migration is applied, a `public.schema_migrations` table is created to track which files have been executed, preventing duplicate runs.
 
 ## Project Structure
 

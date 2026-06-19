@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: passmgr-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules          # preserve container node_modules
+      - /app/dist                  # preserve container dist
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true   # hot-reload inside Docker
+    env_file:
+      - .env
+    stdin_open: true
+    tty: true

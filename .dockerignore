@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.gitignore
+*.local
+.env
+.agents
+.vscode
+.pnpm-store
+.DS_Store
+*.md
+pi-session-*.html

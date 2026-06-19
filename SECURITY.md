@@ -63,16 +63,28 @@ This Password Manager implements End-to-End Encryption (E2EE). All secrets are e
 - Always use a strong, unique master password.
 
 ## Database Schema
-Table: records
-- id: UUID (primary key)
-- user_id: UUID (references auth.users)
-- title: TEXT (in cleartext)
-- ciphertext: TEXT (base64-encoded encrypted blob)
-- nonce: TEXT (base64-encoded)
-- salt: TEXT (base64-encoded)
-- alg_version: TEXT (algorithm identifier)
-- created_at: TIMESTAMPTZ
-- updated_at: TIMESTAMPTZ
+
+### Table: `public.records`
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID (PK) | Primary key |
+| user_id | UUID (FK → auth.users) | Owner of the record; **cannot be changed after creation** (enforced via `BEFORE UPDATE` trigger) |
+| title | TEXT | Cleartext title |
+| ciphertext | TEXT | Base64-encoded encrypted blob |
+| nonce | TEXT | Base64-encoded nonce |
+| salt | TEXT | Base64-encoded salt |
+| alg_version | TEXT | Algorithm identifier |
+| tags | TEXT[] | Array of tags (GIN-indexed) |
+| created_at | TIMESTAMPTZ | Creation timestamp |
+| updated_at | TIMESTAMPTZ | Last-update timestamp (auto-updated via trigger) |
+
+### Triggers
+- `trg_records_prevent_user_id_change` — Rejects any `UPDATE` that attempts to alter `user_id`.
+- `trg_records_set_updated_at` — Automatically sets `updated_at = NOW()` on every `UPDATE`.
+
+### Row-Level Security
+- All RLS policies filter by `auth.uid() = user_id`, ensuring users can only access their own records.
+- The `UPDATE` policy additionally enforces `WITH CHECK (auth.uid() = user_id)` to prevent writing rows that would belong to another user.
 
 ## Algorithm Versioning
 Current version: `v1-sodium-xchacha20-poly1305-argon2id`

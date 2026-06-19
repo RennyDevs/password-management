@@ -1,5 +1,10 @@
+.vscode
 node_modules
 dist
+.pnpm-store
+.agents
+agents.md
+TODO.md
 .env
 *.local
 .DS_Store
