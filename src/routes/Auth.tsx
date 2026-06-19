@@ -6,6 +6,7 @@ import {
   getLockRemaining,
   processFailedAttempt,
 } from '../lib/utils/rateLimit';
+import { storeCredential, tryAutofill } from '../lib/credentials/navigatorCredentials';
 
 export default function Auth() {
   const { t } = useTranslation();
@@ -14,6 +15,7 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const autoFilledRef = useRef(false);
 
   // Per-mode rate limit state (sign-in vs sign-up tracked separately)
   const [rateLimit, setRateLimit] = useState<RateLimitState>({
@@ -47,6 +49,19 @@ export default function Auth() {
 
   const lockedOut = getLockRemaining(rateLimit.lockedUntil) > 0;
 
+  // Try silent autofill on mount (once)
+  useEffect(() => {
+    if (autoFilledRef.current) return;
+    autoFilledRef.current = true;
+
+    if (isLogin) {
+      tryAutofill((username, password) => {
+        setEmail(username);
+        setPassword(password);
+      });
+    }
+  }, [isLogin]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -68,6 +83,17 @@ export default function Auth() {
       }
       // Reset rate limit on success
       setRateLimit({ attempts: 0, lockedUntil: null });
+
+      // Store credential for browser autofill (silent, best-effort)
+      if (isLogin && email && password) {
+        try {
+          await storeCredential(
+            new PasswordCredential({ id: email, password }),
+          );
+        } catch {
+          // Browser may reject if the user declined the prompt
+        }
+      }
     } catch (err) {
       const { state, remaining, lockedSeconds } = processFailedAttempt(rateLimit);
       setRateLimit(state);
@@ -108,6 +134,7 @@ export default function Auth() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
                 placeholder={t('auth.emailPlaceholder')}
+                autoComplete="username"
                 required
                 autoFocus
               />
@@ -124,6 +151,7 @@ export default function Auth() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
                 placeholder={t('auth.passwordPlaceholder')}
+                autoComplete="current-password"
                 required
                 minLength={6}
               />

@@ -136,7 +136,10 @@
     "unlockTitle": "Desbloquear: {{title}}",
     "deleteConfirmTitle": "Eliminar Registro",
     "deleteConfirmMessage": "¿Estás seguro de que quieres eliminar \"{{title}}\"? Esta acción no se puede deshacer.",
-    "clipboardClearFailed": "⚠️ No se pudo limpiar el portapapeles después de copiar: {{error}}. Tu secreto podría seguir en el portapapeles."
+    "clipboardClearFailed": "⚠️ No se pudo limpiar el portapapeles después de copiar: {{error}}. Tu secreto podría seguir en el portapapeles.",
+    "autofill": "Autocompletar",
+    "autofillStored": "✓ Credencial guardada para \"{{username}}\" – el navegador ofrecerá autocompletar en este sitio",
+    "autofillStoredGeneric": "✓ Credencial guardada para autocompletar en este sitio"
   },
   "editRecordModal": {
     "newRecord": "Nuevo Registro",

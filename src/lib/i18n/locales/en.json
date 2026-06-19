@@ -136,7 +136,10 @@
     "unlockTitle": "Unlock: {{title}}",
     "deleteConfirmTitle": "Delete Record",
     "deleteConfirmMessage": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone.",
-    "clipboardClearFailed": "⚠️ Failed to clear clipboard after copy: {{error}}. Your secret may still be in the clipboard."
+    "clipboardClearFailed": "⚠️ Failed to clear clipboard after copy: {{error}}. Your secret may still be in the clipboard.",
+    "autofill": "Autofill",
+    "autofillStored": "✓ Credential saved for \"{{username}}\" – browser will offer autofill on this site",
+    "autofillStoredGeneric": "✓ Credential saved for autofill on this site"
   },
   "editRecordModal": {
     "newRecord": "New Record",
