@@ -1,7 +1,8 @@
 {
   "header": {
     "title": "Administrador de Contraseñas",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "language": "Idioma"
   },
   "auth": {
     "title": "Administrador de Contraseñas",

@@ -3,7 +3,7 @@ import { initReactI18next } from 'react-i18next';
 import en from './locales/en.json';
 import es from './locales/es.json';
 
-// Detect language from navigator
+// Detect language from navigator.language only (no navigator.languages)
 function detectLanguage(): string {
   if (typeof navigator !== 'undefined') {
     const lang = navigator.language;
@@ -25,5 +25,15 @@ void i18n.use(initReactI18next).init({
     escapeValue: false, // React already handles escaping
   },
 });
+
+// React to system language changes (e.g. macOS language switch)
+if (typeof window !== 'undefined') {
+  window.addEventListener('languagechange', () => {
+    const detected = detectLanguage();
+    if (i18n.language !== detected) {
+      i18n.changeLanguage(detected);
+    }
+  });
+}
 
 export default i18n;

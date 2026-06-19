@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import i18n from '../lib/i18n/i18n';
 import { signOut } from '../lib/auth/supabaseAuth';
 import { useUser } from '../lib/auth/UserContext';
 
@@ -13,6 +14,10 @@ export default function Header({ onLogout }: HeaderProps) {
   const handleLogout = async () => {
     await signOut();
     onLogout();
+  };
+
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    void i18n.changeLanguage(e.target.value);
   };
 
   return (
@@ -31,6 +36,17 @@ export default function Header({ onLogout }: HeaderProps) {
                 {user.email}
               </span>
             )}
+            <label className="flex items-center gap-1.5 text-sm">
+              <span className="text-indigo-200">{t('header.language')}:</span>
+              <select
+                value={i18n.language}
+                onChange={handleLanguageChange}
+                className="bg-indigo-600 border border-indigo-500 text-white rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer"
+              >
+                <option value="en">English</option>
+                <option value="es">Español</option>
+              </select>
+            </label>
             <button
               onClick={handleLogout}
               className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded text-sm transition-colors"
