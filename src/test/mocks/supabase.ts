@@ -12,10 +12,8 @@ export interface MockSupabaseOptions {
 }
 
 export function createMockSupabaseClient(
-  options: MockSupabaseOptions = {},
+  _options: MockSupabaseOptions = {},
 ): SupabaseClient {
-  const { records = [], shouldFail = false } = options;
-
   const mockSelect = vi.fn().mockReturnThis();
   const mockEq = vi.fn().mockReturnThis();
   const mockSingle = vi.fn().mockReturnThis();
@@ -31,8 +29,8 @@ export function createMockSupabaseClient(
     order: mockOrder,
     delete: mockDelete,
     upsert: mockUpsert,
-    from: vi.fn().mockReturnValue(builder),
   };
+  builder.from = vi.fn().mockReturnValue(builder);
 
   // Default mock implementations
   mockSelect.mockImplementation(() => builder);

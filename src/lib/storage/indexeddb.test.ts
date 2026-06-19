@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 // ──────────────────────────────────────────────
 // Use fake-indexeddb for in-memory IndexedDB
@@ -151,7 +151,9 @@ describe('IndexedDB storage', () => {
       const ops = await getPendingOps();
       expect(ops).toHaveLength(1);
       expect(ops[0].type).toBe('upsert');
-      expect(ops[0].record.id).toBe('pending-1');
+      if (ops[0].type === 'upsert') {
+        expect(ops[0].record.id).toBe('pending-1');
+      }
     });
 
     it('should remove a pending op by id', async () => {
@@ -197,7 +199,9 @@ describe('IndexedDB storage', () => {
       const ops = await getPendingOps();
       expect(ops).toHaveLength(2);
       expect(ops[0].type).toBe('upsert');
-      expect(ops[0].record.id).toBe('a');
+      if (ops[0].type === 'upsert') {
+        expect(ops[0].record.id).toBe('a');
+      }
       expect(ops[1].type).toBe('delete');
       expect(ops[1].id).toBe('b');
     });

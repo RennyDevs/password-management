@@ -23,10 +23,11 @@ export function createMockSodiumWrapper() {
       return bytes;
     }),
     encryptXChaCha20: vi.fn((key: Uint8Array, plaintext: Uint8Array, nonce?: Uint8Array) => ({
+      key,
       ciphertext: plaintext, // passthrough for tests
       nonce: nonce ?? new Uint8Array(24).fill(0xCD),
     })),
-    decryptXChaCha20: vi.fn((key: Uint8Array, ciphertext: Uint8Array, nonce: Uint8Array) => {
+    decryptXChaCha20: vi.fn((key: Uint8Array, ciphertext: Uint8Array, _nonce: Uint8Array) => {
       // Simulate decryption failure for wrong keys
       if (key.length === 0) throw new Error('Decryption failed');
       return ciphertext;
@@ -64,7 +65,7 @@ export function createMockCrypto() {
   const mockNonce = new Uint8Array(24).fill(0xCD);
 
   return {
-    deriveKey: vi.fn(async (password: string, salt: Uint8Array) => {
+    deriveKey: vi.fn(async (password: string) => {
       const encoder = new TextEncoder();
       const combined = encoder.encode(password + '::salt');
       const hash = new Uint8Array(32);
@@ -77,6 +78,7 @@ export function createMockCrypto() {
       const encoder = new TextEncoder();
       const ptBytes = encoder.encode(plaintext);
       return {
+        password,
         ciphertextBase64: btoa(String.fromCharCode(...ptBytes)),
         nonceBase64: btoa(String.fromCharCode(...mockNonce)),
         saltBase64: btoa(String.fromCharCode(...mockSalt)),
@@ -87,8 +89,8 @@ export function createMockCrypto() {
       async (
         password: string,
         ciphertextBase64: string,
-        nonceBase64: string,
-        saltBase64: string,
+        _nonceBase64: string,
+        _saltBase64: string,
       ) => {
         if (password === 'wrong-password') {
           throw new Error('Decryption failed');
