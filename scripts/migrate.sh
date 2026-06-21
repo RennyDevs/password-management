@@ -15,8 +15,8 @@
 
 set -euo pipefail
 
-MIGRATIONS_DIR="supabase/migrations"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+MIGRATIONS_DIR="${SCRIPT_DIR}/supabase/migrations"
 
 # Colors
 RED='\033[0;31m'
