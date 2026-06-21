@@ -1,6 +1,7 @@
 # Security Documentation
 
 ## Overview
+
 This Password Manager implements End-to-End Encryption (E2EE). All secrets are encrypted on the client before being sent to the server. The server (Supabase) only stores encrypted blobs and metadata.
 
 ## Cryptographic Parameters
@@ -90,3 +91,53 @@ This Password Manager implements End-to-End Encryption (E2EE). All secrets are e
 Current version: `v1-sodium-xchacha20-poly1305-argon2id`
 
 This version identifier is stored with each record to allow future algorithm migrations.
+
+## Responsible Disclosure
+
+We take the security of this project seriously. If you believe you have found a security vulnerability, please follow the steps below.
+
+### Reporting a Vulnerability
+
+**Do not open a public GitHub issue.** Instead, send a detailed report via email or private channel.
+
+1. **Contact**: Send an email to **[security@example.com](mailto:security@example.com)** (replace with maintainer's actual email address).
+2. **Encryption**: If possible, encrypt your report using the maintainer's PGP public key (available at `https://example.com/pgp-key.asc` — replace with actual URL).
+3. **Details**: Include the following in your report:
+   - Type of vulnerability (e.g., XSS, privilege escalation, cryptographic weakness)
+   - Steps to reproduce the issue
+   - Affected versions and components
+   - Any proof-of-concept code (if available)
+   - Potential impact
+   - Suggested remediation (if any)
+
+### What to Expect
+
+- **Acknowledgment**: We will acknowledge receipt of your report within **72 hours**.
+- **Assessment**: We will investigate and validate the reported issue within **7 business days**.
+- **Patching**: Once confirmed, we will develop and release a fix as quickly as possible. The timeline depends on severity:
+  - **Critical / High**: Fix within **7 days**.
+  - **Medium**: Fix within **30 days**.
+  - **Low**: Fix within **90 days** or next release cycle.
+- **Disclosure**: After the fix is released, we will publicly disclose the vulnerability and credit the reporter (unless you prefer to remain anonymous).
+
+### Bug Bounty
+
+This is a community project maintained by volunteers. At this time, **no bug bounty program** is available. We deeply appreciate responsible disclosures regardless.
+
+### Scope
+
+The following are **in scope**:
+- `src/lib/crypto/` — Encryption and key derivation logic
+- `src/lib/auth/` — Authentication flow
+- `src/lib/storage/` — Data storage and sync
+- `src/hooks/` — Record and session handling hooks
+- Supabase RLS policies and database schema (`supabase/migrations/`)
+- IndexedDB (via `idb`) caching mechanism
+
+The following are **out of scope**:
+- Dependencies already reported upstream
+- Theoretical attacks without a practical proof of concept
+- Social engineering attacks against project maintainers
+- Vulnerabilities in the Supabase platform itself
+
+Thank you for helping keep this project and its users safe.
