@@ -2,6 +2,30 @@
 
 A web-based password manager with End-to-End Encryption (E2EE). Built with React, Vite, TypeScript, Tailwind CSS, and Supabase.
 
+## Screenshots
+
+> **Note:** To take your own screenshots, run the app locally with `npm run dev` and capture the screens below.
+
+| Page | Screenshot |
+|------|-----------|
+| **Auth (Login/Signup)** | ![](./screenshots/auth.png) |
+| **Records Home** | ![](./screenshots/home.png) |
+| **Master Password Prompt** | ![](./screenshots/master-password.png) |
+| **Edit / Create Record** | ![](./screenshots/edit-record.png) |
+| **Settings** | ![](./screenshots/settings.png) |
+| **Change Password** | ![](./screenshots/change-password.png) |
+
+### What to capture
+
+1. **`auth.png`** — The login/signup page with email and password fields. Includes an error state or the lockout banner if visible.
+2. **`home.png`** — The main records list showing multiple entries, search bar, tags filter, and the new-record button.
+3. **`master-password.png`** — The master password modal overlay when creating or editing a record.
+4. **`edit-record.png`** — The edit/create record modal with title input, secret textarea (markdown), and tags.
+5. **`settings.png`** — The settings page showing security info, import/export options, and session details.
+6. **`change-password.png`** — The change-password form with current and new password fields.
+
+---
+
 ## Features
 
 - **E2EE Encryption**: Secrets are encrypted on the client before being sent to the server
