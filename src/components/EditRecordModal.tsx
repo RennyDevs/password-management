@@ -85,21 +85,35 @@ export default function EditRecordModal({
   const titleId = 'edit-record-modal-title';
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" role="presentation">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
       <div
         ref={focusTrapRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-lg vault-card p-6 max-h-[90vh] overflow-y-auto animate-scale-in"
       >
-        <h2 id={titleId} className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          {mode === 'create' ? t('editRecordModal.newRecord') : t('editRecordModal.editRecord')}
-        </h2>
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-700/50">
+          <h2 id={titleId} className="text-base font-semibold text-slate-100">
+            {mode === 'create' ? t('editRecordModal.newRecord') : t('editRecordModal.editRecord')}
+          </h2>
+          <button
+            onClick={onCancel}
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 transition-colors"
+            aria-label="Close"
+            disabled={saving}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit}>
           {/* Title */}
           <div className="mb-4">
-            <label htmlFor="edit-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="edit-title" className="block text-sm font-medium text-slate-300 mb-1.5">
               {t('editRecordModal.titleLabel')}
             </label>
             <input
@@ -107,7 +121,7 @@ export default function EditRecordModal({
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+              className="vault-input"
               placeholder={t('editRecordModal.titlePlaceholder')}
               disabled={saving}
               autoFocus
@@ -116,33 +130,32 @@ export default function EditRecordModal({
 
           {/* Tags */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t('editRecordModal.tagsLabel')} <span className="text-xs text-gray-400 dark:text-gray-500 font-normal">{t('editRecordModal.tagsHint')}</span>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">
+              {t('editRecordModal.tagsLabel')} <span className="text-xs text-slate-500 font-normal">{t('editRecordModal.tagsHint')}</span>
             </label>
-            <div className="flex flex-wrap items-center gap-1.5 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 min-h-[40px]">
+            <div className="flex flex-wrap items-center gap-1.5 p-2.5 vault-input min-h-[42px] cursor-text" onClick={() => document.getElementById('tag-input')?.focus()}>
               {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs rounded-full"
-                >
+                <span key={tag} className="tag-chip text-xs">
                   {tag}
                   <button
                     type="button"
                     onClick={() => removeTag(tag)}
-                    className="text-indigo-500 hover:text-indigo-800 dark:hover:text-indigo-200"
+                    className="text-cyan-300/60 hover:text-cyan-200 ml-0.5"
+                    aria-label={`Remove tag ${tag}`}
                   >
                     &times;
                   </button>
                 </span>
               ))}
               <input
+                id="tag-input"
                 type="text"
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleTagKeyDown}
                 onBlur={() => tagInput.trim() && addTag(tagInput)}
                 placeholder={tags.length === 0 ? t('editRecordModal.tagsPlaceholder') : ''}
-                className="flex-1 min-w-[80px] border-none bg-transparent outline-none text-gray-900 dark:text-white text-sm p-0"
+                className="flex-1 min-w-[80px] border-none bg-transparent outline-none text-slate-100 text-sm p-0 placeholder-slate-500"
                 disabled={saving}
               />
             </div>
@@ -150,17 +163,17 @@ export default function EditRecordModal({
 
           {/* Secret with generator button */}
           <div className="mb-4">
-            <div className="flex items-center justify-between mb-1">
-              <label htmlFor="edit-secret" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {t('editRecordModal.secretLabel')} <span className="text-xs text-gray-400 dark:text-gray-500 font-normal">{t('editRecordModal.markdownHint')}</span>
+            <div className="flex items-center justify-between mb-1.5">
+              <label htmlFor="edit-secret" className="text-sm font-medium text-slate-300">
+                {t('editRecordModal.secretLabel')} <span className="text-xs text-slate-500 font-normal">{t('editRecordModal.markdownHint')}</span>
               </label>
               <button
                 type="button"
                 onClick={() => setShowGenerator(true)}
-                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1"
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
                 </svg>
                 {t('editRecordModal.generatePassword')}
               </button>
@@ -177,16 +190,21 @@ export default function EditRecordModal({
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300">
-              {error}
+            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-300">
+              <div className="flex items-start gap-2">
+                <svg className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+                <span>{error}</span>
+              </div>
             </div>
           )}
 
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-700/50">
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="btn-secondary text-xs"
               disabled={saving}
             >
               {t('editRecordModal.cancel')}
@@ -194,9 +212,17 @@ export default function EditRecordModal({
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              className="btn-primary"
             >
-              {saving ? t('editRecordModal.saving') : mode === 'create' ? t('editRecordModal.create') : t('editRecordModal.save')}
+              {saving ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  {t('editRecordModal.saving')}
+                </>
+              ) : mode === 'create' ? t('editRecordModal.create') : t('editRecordModal.save')}
             </button>
           </div>
         </form>

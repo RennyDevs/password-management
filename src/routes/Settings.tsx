@@ -2,10 +2,10 @@ import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUser } from '../lib/auth/UserContext';
 import { signOut, signOutGlobal } from '../lib/auth/supabaseAuth';
-import { useFocusTrap } from '../hooks/useFocusTrap';
 import ExportImportModal from '../components/ExportImportModal';
-import Toast from '../components/Toast';
-import type { ToastMessage } from '../components/Toast';
+import ToastContainer from '../components/ui/Toast';
+import type { ToastMessage } from '../components/ui/types';
+import Modal from '../components/ui/Modal';
 
 interface SettingsProps {
   onLogout: () => void;
@@ -24,9 +24,6 @@ export default function Settings({ onLogout }: SettingsProps) {
   const addToast = (text: string, type: 'success' | 'error' | 'info') => {
     const id = String(++toastId);
     setToasts((prev) => [...prev, { id, text, type }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 5000);
   };
 
   const dismissToast = (id: string) => setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -40,9 +37,6 @@ export default function Settings({ onLogout }: SettingsProps) {
     await signOutGlobal();
     onLogout();
   };
-
-  const signOutFocusTrapRef = useFocusTrap(showSignOutConfirm);
-  const globalSignOutFocusTrapRef = useFocusTrap(showGlobalSignOutConfirm);
 
   const handleEscape = useCallback(() => {
     if (showSignOutConfirm) setShowSignOutConfirm(false);
@@ -58,147 +52,148 @@ export default function Settings({ onLogout }: SettingsProps) {
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [showSignOutConfirm, showGlobalSignOutConfirm, handleEscape]);
 
+  const sectionClass = 'space-y-4';
+  const sectionTitleClass = 'text-base font-semibold text-slate-100';
+
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('settings.heading')}</h2>
+    <div className="max-w-2xl mx-auto animate-fade-in">
+      <h2 className="text-xl font-bold text-slate-100 tracking-tight mb-6">{t('settings.heading')}</h2>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6 space-y-6">
+      <div className="space-y-4">
         {/* Account section */}
-        <div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">{t('settings.account')}</h3>
-          {user ? (
-            <div className="space-y-2">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {t('settings.signedInAs', { email: user.email })}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {t('settings.userId', { id: user.id })}
-              </p>
-              <div className="flex flex-wrap gap-2 mt-3">
-                <button
-                  onClick={() => setShowSignOutConfirm(true)}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
-                >
-                  {t('settings.signOut')}
-                </button>
-                <button
-                  onClick={() => setShowGlobalSignOutConfirm(true)}
-                  className="px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-colors text-sm"
-                >
-                  {t('settings.signOutGlobal')}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-gray-500 dark:text-gray-400">{t('settings.notSignedIn')}</p>
-          )}
-        </div>
-
-        <hr className="border-gray-200 dark:border-gray-700" />
-
-        {/* Data section */}
-        <div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">{t('settings.data')}</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{t('settings.dataDescription')}</p>
-          <button
-            onClick={() => setShowExportImport(true)}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
-          >
-            {t('settings.exportImport')}
-          </button>
-        </div>
-
-        <hr className="border-gray-200 dark:border-gray-700" />
-
-        {/* Security section */}
-        <div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">{t('settings.security')}</h3>
-          <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-            <p>
-              <span className="font-medium">{t('settings.encryption')}</span> XChaCha20-Poly1305 via libsodium
-            </p>
-            <p>
-              <span className="font-medium">{t('settings.keyDerivation')}</span> Argon2id (time=3, memory=64MB, parallelism=1)
-            </p>
-            <p>
-              <span className="font-medium">{t('settings.sessionTimeout')}</span> 5 minutes of inactivity
-            </p>
-            <p>
-              <span className="font-medium">{t('settings.protection')}</span> Lock after 5 failed master password attempts
-            </p>
-            <p className="mt-3 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg border border-amber-200 dark:border-amber-800">
-              {t('settings.masterPasswordWarning')}
-            </p>
+        <div className="vault-card p-5 sm:p-6">
+          <h3 className={sectionTitleClass}>{t('settings.account')}</h3>
+          <div className={sectionClass}>
+            {user ? (
+              <>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-700/30 border border-slate-600/20">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center text-sm font-semibold text-white flex-shrink-0">
+                    {user.email?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm text-slate-200 truncate">{user.email}</p>
+                    <p className="text-xs text-slate-500 truncate">{t('settings.signedInAs', { email: '' })}</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button onClick={() => setShowSignOutConfirm(true)} className="btn-danger text-xs">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                    </svg>
+                    {t('settings.signOut')}
+                  </button>
+                  <button onClick={() => setShowGlobalSignOutConfirm(true)} className="btn-secondary text-xs">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-.99-3.467l2.31-.66A2.25 2.25 0 009 15.553z" />
+                    </svg>
+                    {t('settings.signOutGlobal')}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-slate-400">{t('settings.notSignedIn')}</p>
+            )}
           </div>
         </div>
 
-        <hr className="border-gray-200 dark:border-gray-700" />
+        {/* Data section */}
+        <div className="vault-card p-5 sm:p-6">
+          <h3 className={sectionTitleClass}>{t('settings.data')}</h3>
+          <div className={sectionClass}>
+            <p className="text-sm text-slate-400">{t('settings.dataDescription')}</p>
+            <button onClick={() => setShowExportImport(true)} className="btn-primary text-xs">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              {t('settings.exportImport')}
+            </button>
+          </div>
+        </div>
+
+        {/* Security section */}
+        <div className="vault-card p-5 sm:p-6">
+          <h3 className={sectionTitleClass}>{t('settings.security')}</h3>
+          <div className={sectionClass}>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-lg bg-slate-700/30 border border-slate-600/20">
+                <p className="text-xs text-slate-500 mb-0.5">{t('settings.encryption')}</p>
+                <p className="text-sm text-slate-200 font-mono text-xs">XChaCha20-Poly1305</p>
+              </div>
+              <div className="p-3 rounded-lg bg-slate-700/30 border border-slate-600/20">
+                <p className="text-xs text-slate-500 mb-0.5">{t('settings.keyDerivation')}</p>
+                <p className="text-sm text-slate-200 font-mono text-xs">Argon2id</p>
+              </div>
+              <div className="p-3 rounded-lg bg-slate-700/30 border border-slate-600/20">
+                <p className="text-xs text-slate-500 mb-0.5">{t('settings.sessionTimeout')}</p>
+                <p className="text-sm text-slate-200">5 min</p>
+              </div>
+              <div className="p-3 rounded-lg bg-slate-700/30 border border-slate-600/20">
+                <p className="text-xs text-slate-500 mb-0.5">{t('settings.protection')}</p>
+                <p className="text-sm text-slate-200">5 attempts</p>
+              </div>
+            </div>
+            <div className="p-4 rounded-lg bg-amber-500/5 border border-amber-500/15 text-xs text-amber-300/80">
+              <div className="flex items-start gap-2">
+                <svg className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <span>{t('settings.masterPasswordWarning')}</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* About section */}
-        <div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">{t('settings.about')}</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {t('settings.aboutDescription')}
-          </p>
+        <div className="vault-card p-5 sm:p-6">
+          <h3 className={sectionTitleClass}>{t('settings.about')}</h3>
+          <div className={sectionClass}>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              {t('settings.aboutDescription')}
+            </p>
+          </div>
         </div>
       </div>
 
+      {/* Sign Out Confirm Modal */}
       {showSignOutConfirm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div
-            ref={signOutFocusTrapRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="sign-out-confirm-title"
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6"
-          >
-            <h4 id="sign-out-confirm-title" className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('settings.signOutConfirmTitle')}</h4>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">{t('settings.signOutConfirmMessage')}</p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowSignOutConfirm(false)}
-                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
+        <Modal
+          title={t('settings.signOutConfirmTitle')}
+          onClose={() => setShowSignOutConfirm(false)}
+          size="sm"
+          footer={
+            <>
+              <button onClick={() => setShowSignOutConfirm(false)} className="btn-secondary text-xs">
                 {t('settings.cancel')}
               </button>
-              <button
-                onClick={handleSignOut}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
-              >
+              <button onClick={handleSignOut} className="btn-danger text-xs">
                 {t('settings.signOutConfirmButton')}
               </button>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+        >
+          <p className="text-sm text-slate-300">{t('settings.signOutConfirmMessage')}</p>
+        </Modal>
       )}
 
+      {/* Global Sign Out Confirm Modal */}
       {showGlobalSignOutConfirm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div
-            ref={globalSignOutFocusTrapRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="global-sign-out-confirm-title"
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6"
-          >
-            <h4 id="global-sign-out-confirm-title" className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('settings.signOutGlobalConfirmTitle')}</h4>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">{t('settings.signOutGlobalConfirmMessage')}</p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowGlobalSignOutConfirm(false)}
-                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
+        <Modal
+          title={t('settings.signOutGlobalConfirmTitle')}
+          onClose={() => setShowGlobalSignOutConfirm(false)}
+          size="sm"
+          footer={
+            <>
+              <button onClick={() => setShowGlobalSignOutConfirm(false)} className="btn-secondary text-xs">
                 {t('settings.cancel')}
               </button>
-              <button
-                onClick={handleGlobalSignOut}
-                className="px-4 py-2 rounded-lg bg-red-700 text-white hover:bg-red-800 transition-colors"
-              >
+              <button onClick={handleGlobalSignOut} className="btn-danger text-xs">
                 {t('settings.signOutGlobalConfirmButton')}
               </button>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+        >
+          <p className="text-sm text-slate-300">{t('settings.signOutGlobalConfirmMessage')}</p>
+        </Modal>
       )}
 
       {showExportImport && (
@@ -208,7 +203,7 @@ export default function Settings({ onLogout }: SettingsProps) {
         />
       )}
 
-      <Toast messages={toasts} onDismiss={dismissToast} />
+      <ToastContainer messages={toasts} onDismiss={dismissToast} />
     </div>
   );
 }

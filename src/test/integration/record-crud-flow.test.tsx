@@ -60,7 +60,7 @@ describe('Record CRUD flow integration', () => {
       </UserContext.Provider>
     );
 
-    expect(screen.getByText('recordList.loading')).toBeInTheDocument();
+    expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument();
   });
 
   it('should show welcome message when no user', () => {
@@ -181,7 +181,7 @@ describe('Record CRUD flow integration', () => {
     });
 
     // Find and click delete button for 'Email Password'
-    const recordDeleteButtons = screen.getAllByText('recordItem.delete');
+    const recordDeleteButtons = screen.getAllByRole('button', { name: 'recordItem.delete' });
     // First buttons are record-level delete buttons, pick the first one
     fireEvent.click(recordDeleteButtons[0]);
 
@@ -285,7 +285,7 @@ describe('Record CRUD flow integration', () => {
       });
 
       // Click edit button on first record
-      const editButtons = screen.getAllByText('recordItem.edit');
+      const editButtons = screen.getAllByRole('button', { name: 'recordItem.edit' });
       fireEvent.click(editButtons[0]);
 
       // Master password modal should appear

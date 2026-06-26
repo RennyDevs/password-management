@@ -74,7 +74,7 @@ export default function MarkdownEditor({
       >
         {/* Edit panel */}
         {(activeTab === 'edit' || activeTab === 'split') && (
-          <div className={`${activeTab === 'split' ? 'w-1/2 border-r border-gray-200 dark:border-gray-600' : 'w-full'}`}>
+          <div className={`${activeTab === 'split' ? 'w-1/2 border-r border-slate-600/50' : 'w-full'}`}>
             <textarea
               id={id}
               value={value}
@@ -82,7 +82,7 @@ export default function MarkdownEditor({
               placeholder={resolvedPlaceholder}
               rows={rows}
               disabled={disabled}
-              className="w-full h-full min-h-[inherit] px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm resize-none outline-none border-0 focus:ring-0"
+              className="w-full h-full min-h-[inherit] px-3 py-2 bg-slate-800/50 text-slate-100 font-mono text-sm resize-none outline-none border-0 focus:ring-0 placeholder-slate-500"
               style={{ minHeight }}
             />
           </div>
@@ -95,7 +95,7 @@ export default function MarkdownEditor({
             aria-label={t('markdownEditor.preview')}
             className={`${
               activeTab === 'split' ? 'w-1/2' : 'w-full'
-            } px-3 py-2 overflow-auto prose prose-sm dark:prose-invert max-w-none prose-headings:text-gray-900 dark:prose-headings:text-white prose-a:text-indigo-600 dark:prose-a:text-indigo-400 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:bg-gray-100 dark:prose-code:bg-gray-700 prose-code:text-sm prose-pre:bg-gray-100 dark:prose-pre:bg-gray-700`}
+            } px-3 py-2 overflow-auto prose prose-sm max-w-none prose-invert prose-headings:text-slate-100 prose-a:text-cyan-400 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:bg-slate-700 prose-code:text-slate-200 prose-code:text-xs prose-strong:text-slate-200 prose-pre:bg-slate-700`}
             style={{ minHeight }}
           >
             {value ? (
@@ -103,7 +103,7 @@ export default function MarkdownEditor({
                 {value}
               </ReactMarkdown>
             ) : (
-              <p className="text-gray-400 dark:text-gray-500 italic">{t('markdownEditor.nothingToPreview')}</p>
+              <p className="text-slate-500 italic">{t('markdownEditor.nothingToPreview')}</p>
             )}
           </div>
         )}

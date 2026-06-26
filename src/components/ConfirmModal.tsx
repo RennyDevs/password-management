@@ -28,30 +28,27 @@ export default function ConfirmModal({
   const titleId = 'confirm-modal-title';
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" role="presentation">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
       <div
         ref={focusTrapRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6"
+        className="relative w-full max-w-sm vault-card p-6 animate-scale-in"
       >
-        <h2 id={titleId} className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{title}</h2>
-        <p className="text-gray-600 dark:text-gray-300 mb-6">{message}</p>
+        <h2 id={titleId} className="text-base font-semibold text-slate-100 mb-2">{title}</h2>
+        <p className="text-sm text-slate-300 mb-6">{message}</p>
         <div className="flex justify-end gap-3">
           <button
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            className="btn-secondary text-xs"
           >
             {resolvedCancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            className={`px-4 py-2 rounded-lg text-white transition-colors ${
-              destructive
-                ? 'bg-red-600 hover:bg-red-700'
-                : 'bg-indigo-600 hover:bg-indigo-700'
-            }`}
+            className={destructive ? 'btn-danger' : 'btn-primary'}
           >
             {resolvedConfirmLabel}
           </button>

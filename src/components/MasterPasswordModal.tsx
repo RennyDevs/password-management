@@ -91,18 +91,32 @@ export default function MasterPasswordModal({
   const titleId = 'master-password-modal-title';
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" role="presentation">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
       <div
         ref={focusTrapRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6"
+        className="relative w-full max-w-sm vault-card p-6 animate-scale-in"
       >
-        <h2 id={titleId} className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{title}</h2>
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-700/50">
+          <h2 id={titleId} className="text-base font-semibold text-slate-100">{title}</h2>
+          <button
+            onClick={onCancel}
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 transition-colors"
+            aria-label="Close"
+            disabled={loading}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="master-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="master-password" className="block text-sm font-medium text-slate-300 mb-1.5">
               {t('masterPasswordModal.masterPasswordLabel')}
             </label>
             <input
@@ -111,7 +125,7 @@ export default function MasterPasswordModal({
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+              className="vault-input"
               placeholder={t('masterPasswordModal.masterPasswordPlaceholder')}
               autoFocus
               disabled={loading}
@@ -119,8 +133,13 @@ export default function MasterPasswordModal({
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300">
-              {error}
+            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-300 animate-fade-in" role="alert">
+              <div className="flex items-start gap-2">
+                <svg className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+                <span>{error}</span>
+              </div>
             </div>
           )}
 
@@ -128,7 +147,7 @@ export default function MasterPasswordModal({
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="btn-secondary text-xs"
               disabled={loading}
             >
               {t('masterPasswordModal.cancel')}
@@ -136,9 +155,17 @@ export default function MasterPasswordModal({
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              className="btn-primary"
             >
-              {loading ? (customLoading ?? t('masterPasswordModal.verifying')) : t('masterPasswordModal.unlock')}
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  {customLoading ?? t('masterPasswordModal.verifying')}
+                </>
+              ) : t('masterPasswordModal.unlock')}
             </button>
           </div>
         </form>

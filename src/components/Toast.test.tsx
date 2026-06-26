@@ -21,7 +21,7 @@ describe('Toast', () => {
     const onDismiss = vi.fn();
     render(<Toast messages={mockMessages} onDismiss={onDismiss} />);
 
-    const dismissButtons = screen.getAllByText('✕');
+    const dismissButtons = screen.getAllByRole('button', { name: 'Dismiss' });
     fireEvent.click(dismissButtons[0]);
 
     expect(onDismiss).toHaveBeenCalledWith('1');
@@ -30,8 +30,7 @@ describe('Toast', () => {
   it('should render nothing when messages array is empty', () => {
     const { container } = render(<Toast messages={[]} onDismiss={vi.fn()} />);
 
-    expect(container.querySelector('[role="status"]')).toBeInTheDocument();
-    expect(container.querySelector('[role="status"]')!.children).toHaveLength(0);
+    expect(container.innerHTML).toBe('');
   });
 
   it('should have role="status" and aria-live="polite"', () => {

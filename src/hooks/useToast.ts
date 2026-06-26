@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { ToastMessage } from '../components/Toast';
+import type { ToastMessage } from '../components/ui/types';
 
 let counter = 0;
 function nextId(): string {

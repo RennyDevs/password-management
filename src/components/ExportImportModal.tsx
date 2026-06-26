@@ -42,7 +42,6 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
     if (!user) return false;
 
     try {
-      // Fetch all record IDs for this user
       const recordItems = await fetchRecords(user.id);
 
       const exportRecords: ExportRecord[] = [];
@@ -73,7 +72,6 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
             exportRecords[0].salt,
           );
         } catch {
-          // Password is wrong — signal failure
           return false;
         }
       }
@@ -84,7 +82,6 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
         records: exportRecords,
       };
 
-      // Trigger download
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -114,7 +111,6 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Reset input so re-selecting same file works
     e.target.value = '';
 
     try {
@@ -155,7 +151,6 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
 
     setImportPhase('verifying');
 
-    // Verify password against the first record
     try {
       await decryptPayload(
         password,
@@ -164,7 +159,7 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
         importData.records[0].salt,
       );
     } catch {
-      return false; // Wrong password
+      return false;
     }
 
     setImportPhase('processing');
@@ -174,7 +169,6 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
 
     for (const expRecord of importData.records) {
       try {
-        // Decrypt with the user's master password
         const plaintext = await decryptPayload(
           password,
           expRecord.ciphertext,
@@ -182,10 +176,8 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
           expRecord.salt,
         );
 
-        // Re-encrypt with the same password (it's the user's master password)
         const encrypted = await encryptPlaintext(password, plaintext);
 
-        // Save to user's account
         await saveRecord({
           id: crypto.randomUUID?.() || expRecord.id,
           user_id: user.id,
@@ -206,7 +198,6 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
     setImportPhase('done');
     setStep('import-done');
 
-    // Refresh the record list
     await loadRecords(true);
 
     onToast(t('exportImport.importSuccess', { imported, skipped }), 'success');
@@ -217,55 +208,68 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" role="presentation">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
         <div
           ref={focusTrapRef}
           role="dialog"
           aria-modal="true"
           aria-labelledby="export-import-title"
-          className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6"
+          className="relative w-full max-w-md vault-card p-6 animate-scale-in"
         >
-          <h3 id="export-import-title" className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            {t('exportImport.title')}
-          </h3>
+          <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-700/50">
+            <h3 id="export-import-title" className="text-base font-semibold text-slate-100">
+              {t('exportImport.title')}
+            </h3>
+            <button
+              onClick={onClose}
+              className="p-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 transition-colors"
+              aria-label="Close"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
 
           {step === 'menu' && (
             <div className="space-y-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-slate-400">
                 {t('exportImport.description')}
               </p>
 
               <button
                 onClick={handleExportStart}
-                className="w-full px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-left flex items-center gap-3"
+                className="w-full p-4 rounded-lg bg-gradient-to-r from-cyan-500/10 to-cyan-600/5 border border-cyan-500/20 hover:border-cyan-500/40 hover:from-cyan-500/15 hover:to-cyan-600/10 transition-all text-left flex items-center gap-3 group"
               >
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                <div className="w-10 h-10 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                </div>
                 <div>
-                  <div className="font-medium text-sm">{t('exportImport.exportButton')}</div>
-                  <div className="text-xs text-indigo-200">{t('exportImport.exportDescription')}</div>
+                  <div className="font-medium text-sm text-slate-200">{t('exportImport.exportButton')}</div>
+                  <div className="text-xs text-slate-500">{t('exportImport.exportDescription')}</div>
                 </div>
               </button>
 
               <button
                 onClick={handleImportStart}
-                className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-left flex items-center gap-3"
+                className="w-full p-4 rounded-lg bg-slate-700/30 border border-slate-600/30 hover:bg-slate-700/50 hover:border-slate-500/50 transition-all text-left flex items-center gap-3 group"
               >
-                <svg className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
+                <div className="w-10 h-10 rounded-lg bg-slate-600/40 border border-slate-500/30 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </div>
                 <div>
-                  <div className="font-medium text-sm text-gray-900 dark:text-white">{t('exportImport.importButton')}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">{t('exportImport.importDescription')}</div>
+                  <div className="font-medium text-sm text-slate-200">{t('exportImport.importButton')}</div>
+                  <div className="text-xs text-slate-500">{t('exportImport.importDescription')}</div>
                 </div>
               </button>
 
-              <div className="flex justify-end">
-                <button
-                  onClick={onClose}
-                  className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
-                >
+              <div className="flex justify-end pt-2">
+                <button onClick={onClose} className="btn-secondary text-xs">
                   {t('exportImport.close')}
                 </button>
               </div>
@@ -282,14 +286,13 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
 
           {step === 'export-done' && (
             <div className="text-center py-4">
-              <svg className="w-12 h-12 text-green-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p className="text-gray-700 dark:text-gray-300 mb-4">{t('exportImport.exportComplete')}</p>
-              <button
-                onClick={onClose}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
-              >
+              <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-sm text-slate-200 mb-4">{t('exportImport.exportComplete')}</p>
+              <button onClick={onClose} className="btn-primary">
                 {t('exportImport.close')}
               </button>
             </div>
@@ -297,19 +300,18 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
 
           {step === 'import-done' && (
             <div className="text-center py-4">
-              <svg className="w-12 h-12 text-green-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p className="text-gray-700 dark:text-gray-300 mb-1">
+              <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-sm text-slate-200 mb-1">
                 {t('exportImport.importComplete')}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              <p className="text-xs text-slate-400 mb-4">
                 {t('exportImport.importStats', { imported: importStats.imported, skipped: importStats.skipped, total: importStats.total })}
               </p>
-              <button
-                onClick={onClose}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
-              >
+              <button onClick={onClose} className="btn-primary">
                 {t('exportImport.close')}
               </button>
             </div>
@@ -317,7 +319,6 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
         </div>
       </div>
 
-      {/* Export password prompt */}
       {step === 'export-password' && (
         <MasterPasswordModal
           title={t('exportImport.exportConfirmPassword')}
@@ -326,7 +327,6 @@ export default function ExportImportModal({ onClose, onToast }: ExportImportModa
         />
       )}
 
-      {/* Import password prompt */}
       {step === 'import-password' && (
         <MasterPasswordModal
           title={t('exportImport.importConfirmPassword')}

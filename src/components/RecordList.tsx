@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import type { RecordListItem } from '../types/record';
 import RecordItem from './RecordItem';
 import VirtualList from './VirtualList';
+import { SkeletonList } from './ui/Skeleton';
+import EmptyState from './ui/EmptyState';
 
 interface RecordListProps {
   records: RecordListItem[];
@@ -99,7 +101,7 @@ export default function RecordList({ records, loading, onEdit, onDelete, onToast
         data-record-item={record.id}
         role="option"
         tabIndex={index === 0 ? 0 : -1}
-        className="rounded-lg transition-shadow focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+        className="rounded-xl transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
       >
         <RecordItem
           record={record}
@@ -113,25 +115,20 @@ export default function RecordList({ records, loading, onEdit, onDelete, onToast
   );
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-        <span className="ml-3 text-gray-600 dark:text-gray-400">{t('recordList.loading')}</span>
-      </div>
-    );
+    return <SkeletonList rows={5} />;
   }
 
   if (records.length === 0) {
     return (
-      <div className="text-center py-12">
-        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-        </svg>
-        <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">{t('recordList.noRecords')}</h3>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          {t('recordList.noRecordsText')}
-        </p>
-      </div>
+      <EmptyState
+        icon={
+          <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+          </svg>
+        }
+        title={t('recordList.noRecords')}
+        description={t('recordList.noRecordsText')}
+      />
     );
   }
 
@@ -143,7 +140,6 @@ export default function RecordList({ records, loading, onEdit, onDelete, onToast
         role="listbox"
         aria-label={t('recordList.recordsList')}
         onKeyDown={handleKeyDown}
-        className="h-[70vh]"
       >
         <VirtualList
           items={records}
@@ -161,7 +157,7 @@ export default function RecordList({ records, loading, onEdit, onDelete, onToast
       role="listbox"
       aria-label={t('recordList.recordsList')}
       onKeyDown={handleKeyDown}
-      className="space-y-3"
+      className="space-y-2"
     >
       {records.map((record, index) => renderItem(record, index))}
     </div>

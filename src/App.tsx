@@ -7,11 +7,10 @@ import { onAuthStateChange } from './lib/auth/supabaseAuth';
 import { initSupabase } from './lib/storage/supabase';
 import { ensureSodiumReady } from './lib/crypto/sodiumWrapper';
 import { SessionTimer, SESSION_TIMEOUT_MS } from './lib/utils/timer';
-import { useOnlineSync } from './hooks/useOnlineSync';
 import { logger } from './lib/utils/logger';
 // Re-export useUser for convenience — other files should import from lib/auth/UserContext
 export { useUser } from './lib/auth/UserContext';
-import Header from './components/Header';
+import AppShell from './components/ui/AppShell';
 const Auth = lazy(() => import('./routes/Auth'));
 const Home = lazy(() => import('./routes/Home'));
 const Settings = lazy(() => import('./routes/Settings'));
@@ -28,7 +27,6 @@ export default function App() {
   const [page, setPage] = useState<Page>('home');
   const [initializing, setInitializing] = useState(true);
   const [sodiumReady, setSodiumReady] = useState(false);
-  const { isOnline, pendingCount } = useOnlineSync();
 
   useEffect(() => {
     async function init() {
@@ -115,10 +113,15 @@ export default function App() {
 
   if (initializing) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">{t('app.initializing')}</p>
+          <div className="relative mx-auto w-12 h-12">
+            <div className="absolute inset-0 rounded-xl bg-cyan-500/20 blur-md animate-pulse" />
+            <svg className="relative w-12 h-12 text-cyan-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+          </div>
+          <p className="mt-4 text-slate-400 text-sm animate-pulse">{t('app.initializing')}</p>
         </div>
       </div>
     );
@@ -127,17 +130,22 @@ export default function App() {
   // If no Supabase credentials, show error
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8 max-w-md text-center">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{t('app.configRequired')}</h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 px-4">
+        <div className="vault-card p-8 max-w-md w-full text-center">
+          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-bold text-slate-100 mb-3">{t('app.configRequired')}</h1>
+          <p className="text-sm text-slate-400 mb-4">
             {t('app.configRequiredText')}
           </p>
-          <code className="block text-sm bg-gray-100 dark:bg-gray-700 p-3 rounded text-left">
+          <code className="block text-xs bg-slate-800 border border-slate-600/30 p-3 rounded-lg text-left text-slate-300">
             VITE_SUPABASE_URL=&lt;your-url&gt;<br />
             VITE_SUPABASE_ANON_KEY=&lt;your-anon-key&gt;
           </code>
-          <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-4 text-xs text-slate-500">
             <span dangerouslySetInnerHTML={{ __html: t('app.configFileHint') }} />
           </p>
         </div>
@@ -151,8 +159,8 @@ export default function App() {
       <UserContext.Provider value={null}>
         <Suspense
           fallback={
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400"></div>
             </div>
           }
         >
@@ -165,83 +173,16 @@ export default function App() {
   // Authenticated app
   return (
     <UserContext.Provider value={user}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Header onLogout={handleLogout} />
-
-        {!sodiumReady && (
-          <div className="max-w-4xl mx-auto px-4 py-3">
-            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-sm text-amber-700 dark:text-amber-300">
-              {t('app.cryptoWarning')}
-            </div>
-          </div>
-        )}
-
-        {/* Offline indicator */}
-        {!isOnline && (
-          <div className="max-w-4xl mx-auto px-4 py-3">
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 text-sm text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M9.172 16.172a4 4 0 015.656 0M7.05 11.05a7 7 0 019.9 0M4.929 6.93a10 10 0 0114.142 0" />
-              </svg>
-              <span>{t('app.offlineBanner')}</span>
-              {pendingCount > 0 && (
-                <span className="ml-1">· {t('app.pendingSyncCount', { count: pendingCount })}</span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Online-again sync banner (transient) */}
-        {isOnline && pendingCount > 0 && (
-          <div className="max-w-4xl mx-auto px-4 py-3">
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 text-sm text-green-700 dark:text-green-300 flex items-center gap-2">
-              <svg className="w-4 h-4 flex-shrink-0 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              <span>{t('app.syncingPending', { count: pendingCount })}</span>
-            </div>
-          </div>
-        )}
-
-        {/* Navigation tabs */}
-        <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-          <div className="max-w-4xl mx-auto px-4">
-            <nav className="flex gap-6">
-              <button
-                onClick={() => setPage('home')}
-                className={`py-3 text-sm font-medium border-b-2 transition-colors ${page === 'home'
-                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-              >
-                {t('app.navRecords')}
-              </button>
-              <button
-                onClick={() => setPage('change-password')}
-                className={`py-3 text-sm font-medium border-b-2 transition-colors ${page === 'change-password'
-                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                  }`}
-              >
-                {t('app.navChangePassword')}
-              </button>
-              <button
-                onClick={() => setPage('settings')}
-                className={`py-3 text-sm font-medium border-b-2 transition-colors ${page === 'settings'
-                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-              >
-                {t('app.navSettings')}
-              </button>
-            </nav>
-          </div>
-        </div>
-
+      <AppShell
+        page={page}
+        onNavigate={setPage}
+        onLogout={handleLogout}
+        sodiumReady={sodiumReady}
+      >
         {page === 'home' && <Home />}
         {page === 'settings' && <Settings onLogout={handleLogout} />}
         {page === 'change-password' && <ChangePassword />}
-      </div>
+      </AppShell>
     </UserContext.Provider>
   );
 }

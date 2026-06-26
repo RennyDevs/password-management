@@ -109,22 +109,30 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
-          <div className="text-center mb-8">
-            <svg className="mx-auto w-12 h-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">{t('auth.title')}</h1>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              {isLogin ? t('auth.signInPrompt') : t('auth.signUpPrompt')}
-            </p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 px-4 py-12">
+      <div className="w-full max-w-sm animate-fade-in">
+        {/* Brand / Logo */}
+        <div className="text-center mb-8">
+          <div className="relative inline-flex items-center justify-center w-16 h-16 mb-4">
+            <div className="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-lg" />
+            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 border border-cyan-500/20 flex items-center justify-center">
+              <svg className="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </div>
           </div>
+          <h1 className="text-2xl font-bold text-slate-100 tracking-tight">{t('auth.title')}</h1>
+          <p className="mt-2 text-sm text-slate-400">
+            {isLogin ? t('auth.signInPrompt') : t('auth.signUpPrompt')}
+          </p>
+        </div>
 
+        {/* Auth card */}
+        <div className="vault-card p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            {/* Email */}
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-300">
                 {t('auth.emailLabel')}
               </label>
               <input
@@ -132,7 +140,7 @@ export default function Auth() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                className="vault-input"
                 placeholder={t('auth.emailPlaceholder')}
                 autoComplete="username"
                 required
@@ -140,8 +148,9 @@ export default function Auth() {
               />
             </div>
 
-            <div>
-              <label htmlFor="auth-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label htmlFor="auth-password" className="block text-sm font-medium text-slate-300">
                 {t('auth.passwordLabel')}
               </label>
               <input
@@ -149,7 +158,7 @@ export default function Auth() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                className="vault-input"
                 placeholder={t('auth.passwordPlaceholder')}
                 autoComplete="current-password"
                 required
@@ -157,31 +166,47 @@ export default function Auth() {
               />
             </div>
 
+            {/* Error banner */}
             {error && (
-              <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300">
-                {error}
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-300 animate-fade-in" role="alert">
+                <div className="flex items-start gap-2">
+                  <svg className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                  </svg>
+                  <span>{error}</span>
+                </div>
               </div>
             )}
 
+            {/* Submit button */}
             <button
               type="submit"
               disabled={loading || lockedOut}
-              className="w-full py-2.5 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors font-medium"
+              className="btn-primary w-full"
             >
-              {loading
-                ? t('auth.loading')
-                : lockedOut
-                  ? t('auth.waiting')
-                  : isLogin
-                    ? t('auth.signIn')
-                    : t('auth.signUp')}
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  {t('auth.loading')}
+                </>
+              ) : lockedOut ? (
+                t('auth.waiting')
+              ) : isLogin ? (
+                t('auth.signIn')
+              ) : (
+                t('auth.signUp')
+              )}
             </button>
           </form>
 
+          {/* Toggle mode */}
           <div className="mt-6 text-center">
             <button
               onClick={() => { setIsLogin(!isLogin); setError(''); }}
-              className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+              className="text-sm text-slate-400 hover:text-cyan-400 transition-colors"
             >
               {isLogin ? t('auth.switchToSignUp') : t('auth.switchToSignIn')}
             </button>

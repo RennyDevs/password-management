@@ -4,7 +4,7 @@ import { logger } from '../lib/utils/logger';
 import RecordList from '../components/RecordList';
 import EditRecordModal from '../components/EditRecordModal';
 import MasterPasswordModal from '../components/MasterPasswordModal';
-import Toast from '../components/Toast';
+import ToastContainer from '../components/ui/Toast';
 import { encryptPlaintext } from '../lib/crypto';
 import { useUser } from '../lib/auth/UserContext';
 import { generateId } from '../lib/utils/uid';
@@ -156,10 +156,15 @@ export default function Home() {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+          <div className="w-12 h-12 rounded-xl bg-slate-700/50 border border-slate-600/30 flex items-center justify-center mx-auto mb-3">
+            <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-semibold text-slate-200 mb-1">
             {t('home.welcomeHeading')}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400">{t('home.welcomeText')}</p>
+          <p className="text-sm text-slate-400">{t('home.welcomeText')}</p>
         </div>
       </div>
     );
@@ -179,42 +184,45 @@ export default function Home() {
   });
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {t('home.myRecords')}
-        </h2>
-        <button
-          onClick={handleNewRecord}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+    <div className="animate-fade-in">
+      {/* Header bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 className="text-xl font-bold text-slate-100 tracking-tight">{t('home.myRecords')}</h2>
+          <p className="text-sm text-slate-400 mt-0.5">
+            {records.length} {records.length === 1 ? 'record' : 'records'} · {filteredRecords.length !== records.length && `${filteredRecords.length} shown`}
+          </p>
+        </div>
+        <button onClick={handleNewRecord} className="btn-primary">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
           {t('home.newRecord')}
         </button>
       </div>
 
       {/* Search & Tag filters */}
-      <div className="mb-4 space-y-3">
+      <div className="mb-6 space-y-3">
+        {/* Search */}
         <div className="relative">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('home.searchPlaceholder')}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+            className="vault-input pl-10"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
+              aria-label="Clear search"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           )}
@@ -222,8 +230,8 @@ export default function Home() {
 
         {/* Tag chips */}
         {allTags.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-gray-500 dark:text-gray-400 mr-1">{t('home.filterByTags')}:</span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-xs text-slate-500 mr-1">{t('home.filterByTags')}:</span>
             {allTags.map((tag) => (
               <button
                 key={tag}
@@ -232,11 +240,9 @@ export default function Home() {
                     prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
                   )
                 }
-                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-                  filterTags.includes(tag)
-                    ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-700'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
+                className={`${
+                  filterTags.includes(tag) ? 'tag-chip-active' : 'tag-chip hover:bg-cyan-500/15 hover:border-cyan-500/30'
+                } cursor-pointer text-[11px]`}
               >
                 {tag}
               </button>
@@ -244,7 +250,7 @@ export default function Home() {
             {filterTags.length > 0 && (
               <button
                 onClick={() => setFilterTags([])}
-                className="px-2 py-1 text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400"
+                className="px-2 py-0.5 text-xs text-red-400 hover:text-red-300 transition-colors"
               >
                 {t('home.clearFilters')}
               </button>
@@ -253,13 +259,14 @@ export default function Home() {
         )}
       </div>
 
-      {/* Result count when filtered */}
-      {(searchQuery || filterTags.length > 0) && (
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+      {/* Record count when filtered */}
+      {(searchQuery || filterTags.length > 0) && filteredRecords.length > 0 && (
+        <p className="text-xs text-slate-500 mb-3">
           {t('home.showingResults', { count: filteredRecords.length, total: records.length })}
         </p>
       )}
 
+      {/* Record list */}
       <RecordList
         records={filteredRecords}
         loading={loading}
@@ -268,6 +275,7 @@ export default function Home() {
         onToast={addToast}
       />
 
+      {/* Modals */}
       {editModalOpen && (
         <EditRecordModal
           title={editTitle}
@@ -302,7 +310,7 @@ export default function Home() {
         />
       )}
 
-      <Toast messages={toasts} onDismiss={dismissToast} />
+      <ToastContainer messages={toasts} onDismiss={dismissToast} />
     </div>
   );
 }
