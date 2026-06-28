@@ -17,8 +17,6 @@ vi.mock('../../lib/auth/supabaseAuth', () => ({
   signOut: vi.fn(),
   getCurrentUser: vi.fn(),
   onAuthStateChange: vi.fn(() => vi.fn()),
-  storeCredential: vi.fn(),
-  tryAutofill: vi.fn(),
 }));
 
 vi.mock('../../lib/utils/rateLimit', () => ({
@@ -28,11 +26,6 @@ vi.mock('../../lib/utils/rateLimit', () => ({
     lockedSeconds: 0,
   })),
   getLockRemaining: vi.fn(() => 0),
-}));
-
-vi.mock('../../lib/credentials/navigatorCredentials', () => ({
-  storeCredential: vi.fn(),
-  tryAutofill: vi.fn(),
 }));
 
 describe('Auth flow integration', () => {

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
@@ -6,7 +6,6 @@ import remarkGfm from 'remark-gfm';
 import type { RecordListItem } from '../types/record';
 import { useDecryptRecord } from '../hooks/useDecryptRecord';
 import { copyToClipboard } from '../lib/utils/clipboard';
-import { offerCredentialForAutofill, parseSecret } from '../lib/credentials/navigatorCredentials';
 import MasterPasswordModal from './MasterPasswordModal';
 import ConfirmModal from './ConfirmModal';
 
@@ -51,31 +50,9 @@ export default function RecordItem({ record, onEdit, onDelete, onToast }: Record
     }
   };
 
-  const handleAutofill = async () => {
-    if (!decryptedSecret) return;
-
-    await offerCredentialForAutofill(decryptedSecret, record.title);
-
-    const parsed = parseSecret(decryptedSecret);
-    if (parsed && parsed.username) {
-      onToast(t('recordItem.autofillStored', { username: parsed.username }), 'success');
-    } else {
-      onToast(t('recordItem.autofillStoredGeneric'), 'success');
-    }
-  };
-
-  // Auto-offer credential when the secret is first decrypted
-  // (best-effort, silent — the browser may show its own prompt)
-  const autofillAttemptedRef = useRef(false);
-  if (decryptedSecret !== null && !autofillAttemptedRef.current) {
-    autofillAttemptedRef.current = true;
-    offerCredentialForAutofill(decryptedSecret, record.title).catch(() => {});
-  }
-
   const handleDelete = () => {
     setShowDeleteConfirm(true);
   };
-
   const handleConfirmDelete = () => {
     onDelete(record.id);
     setShowDeleteConfirm(false);
@@ -150,16 +127,7 @@ export default function RecordItem({ record, onEdit, onDelete, onToast }: Record
                 >
                   {t('recordItem.copy')}
                 </button>
-                <button
-                  onClick={handleAutofill}
-                  className="text-xs text-green-600 dark:text-green-400 hover:underline flex items-center gap-0.5"
-                  aria-label={t('recordItem.autofill')}
-                >
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  {t('recordItem.autofill')}
-                </button>
+
                 <button
                   onClick={() => { setDecryptedSecret(null); setShowSecret(false); }}
                   className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
