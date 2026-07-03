@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
@@ -6,7 +6,6 @@ import remarkGfm from 'remark-gfm';
 import type { RecordListItem } from '../types/record';
 import { useDecryptRecord } from '../hooks/useDecryptRecord';
 import { copyToClipboard } from '../lib/utils/clipboard';
-import { offerCredentialForAutofill, parseSecret } from '../lib/credentials/navigatorCredentials';
 import MasterPasswordModal from './MasterPasswordModal';
 import ConfirmModal from './ConfirmModal';
 
@@ -52,31 +51,9 @@ export default function RecordItem({ record, onEdit, onDelete, onToast }: Record
     }
   };
 
-  const handleAutofill = async () => {
-    if (!decryptedSecret) return;
-
-    await offerCredentialForAutofill(decryptedSecret, record.title);
-
-    const parsed = parseSecret(decryptedSecret);
-    if (parsed && parsed.username) {
-      onToast(t('recordItem.autofillStored', { username: parsed.username }), 'success');
-    } else {
-      onToast(t('recordItem.autofillStoredGeneric'), 'success');
-    }
-  };
-
-  // Auto-offer credential when the secret is first decrypted
-  // (best-effort, silent — the browser may show its own prompt)
-  const autofillAttemptedRef = useRef(false);
-  if (decryptedSecret !== null && !autofillAttemptedRef.current) {
-    autofillAttemptedRef.current = true;
-    offerCredentialForAutofill(decryptedSecret, record.title).catch(() => {});
-  }
-
   const handleDelete = () => {
     setShowDeleteConfirm(true);
   };
-
   const handleConfirmDelete = () => {
     onDelete(record.id);
     setShowDeleteConfirm(false);
@@ -187,19 +164,9 @@ export default function RecordItem({ record, onEdit, onDelete, onToast }: Record
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
                   </svg>
                 </button>
-                {decryptedSecret.includes('password') === false && (
-                  <button
-                    onClick={handleAutofill}
-                    className="px-2 py-1 rounded text-xs text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all"
-                    aria-label={t('recordItem.autofill')}
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zm-7.518-.267A8.25 8.25 0 1120.25 10.5M8.288 14.212A5.25 5.25 0 1117.25 10.5" />
-                    </svg>
-                  </button>
-                )}
+
                 <button
-                  onClick={() => { setDecryptedSecret(null); setShowSecret(false); autofillAttemptedRef.current = false; }}
+                  onClick={() => { setDecryptedSecret(null); setShowSecret(false); }}
                   className="px-2 py-1 rounded text-xs text-slate-400 hover:text-slate-300 hover:bg-slate-700/50 transition-all"
                   aria-label={t('recordItem.clear')}
                 >

@@ -6,7 +6,6 @@ import {
   getLockRemaining,
   processFailedAttempt,
 } from '../lib/utils/rateLimit';
-import { storeCredential, tryAutofill } from '../lib/credentials/navigatorCredentials';
 
 export default function Auth() {
   const { t } = useTranslation();
@@ -15,9 +14,6 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const autoFilledRef = useRef(false);
-
-  // Per-mode rate limit state (sign-in vs sign-up tracked separately)
   const [rateLimit, setRateLimit] = useState<RateLimitState>({
     attempts: 0,
     lockedUntil: null,
@@ -49,18 +45,7 @@ export default function Auth() {
 
   const lockedOut = getLockRemaining(rateLimit.lockedUntil) > 0;
 
-  // Try silent autofill on mount (once)
-  useEffect(() => {
-    if (autoFilledRef.current) return;
-    autoFilledRef.current = true;
 
-    if (isLogin) {
-      tryAutofill((username, password) => {
-        setEmail(username);
-        setPassword(password);
-      });
-    }
-  }, [isLogin]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,16 +69,7 @@ export default function Auth() {
       // Reset rate limit on success
       setRateLimit({ attempts: 0, lockedUntil: null });
 
-      // Store credential for browser autofill (silent, best-effort)
-      if (isLogin && email && password) {
-        try {
-          await storeCredential(
-            new PasswordCredential({ id: email, password }),
-          );
-        } catch {
-          // Browser may reject if the user declined the prompt
-        }
-      }
+
     } catch (err) {
       const { state, remaining, lockedSeconds } = processFailedAttempt(rateLimit);
       setRateLimit(state);
